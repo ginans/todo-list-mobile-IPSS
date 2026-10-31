@@ -56,6 +56,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
         <View style={styles.titleArea}>
           <Text
+            key={`title-${isCompleted}`}
             style={[styles.title, isCompleted && styles.titleCompleted]}
             numberOfLines={2}
           >
@@ -89,7 +90,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       </View>
 
       {hasDescription && (
-        <Text style={[styles.description, isCompleted && styles.descriptionCompleted]}>
+        <Text
+          key={`desc-${isCompleted}`}
+          style={[styles.description, isCompleted && styles.descriptionCompleted]}
+        >
           {task.description}
         </Text>
       )}

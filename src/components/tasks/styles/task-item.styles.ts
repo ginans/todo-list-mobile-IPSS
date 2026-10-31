@@ -56,6 +56,7 @@ export const styles = StyleSheet.create({
   },
   titleCompleted: {
     textDecorationLine: 'line-through',
+    textDecorationStyle: 'solid',
     color: semanticColors.mutedText,
   },
   badgeRow: {
@@ -83,6 +84,8 @@ export const styles = StyleSheet.create({
     marginBottom: 8,
   },
   descriptionCompleted: {
+    textDecorationLine: 'line-through',
+    textDecorationStyle: 'solid',
     color: paperPalette.inkMuted,
   },
   footerRow: {
