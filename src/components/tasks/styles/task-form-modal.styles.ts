@@ -1,0 +1,45 @@
+import { StyleSheet } from 'react-native';
+import { semanticColors } from '../../../theme/app-theme';
+
+export const styles = StyleSheet.create({
+  modalContainer: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 20,
+    borderRadius: 20,
+    padding: 20,
+    maxHeight: '85%',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  subtitle: {
+    fontSize: 13,
+    color: semanticColors.mutedText,
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  prioritySection: {
+    marginVertical: 10,
+  },
+  priorityLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#334155',
+    marginBottom: 6,
+  },
+  segmented: {
+    backgroundColor: '#F8FAFC',
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginTop: 18,
+    gap: 8,
+  },
+  actionButton: {
+    minWidth: 110,
+  },
+});

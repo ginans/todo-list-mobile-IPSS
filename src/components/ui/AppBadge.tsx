@@ -1,8 +1,9 @@
 import React from 'react';
-import { StyleSheet, Text, View, ViewStyle, StyleProp } from 'react-native';
+import { Text, View, ViewStyle, StyleProp } from 'react-native';
 import { TaskStatus } from '../../core/task/enums/task-status.enum';
 import { TaskPriority } from '../../core/task/enums/task-priority.enum';
 import { semanticColors } from '../../theme/app-theme';
+import { styles } from './styles/app-badge.styles';
 
 type BadgeType = 'status' | 'priority' | 'custom';
 
@@ -79,18 +80,3 @@ export const AppBadge: React.FC<AppBadgeProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.3,
-    textTransform: 'uppercase',
-  },
-});

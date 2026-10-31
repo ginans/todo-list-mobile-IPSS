@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, ViewStyle, StyleProp } from 'react-native';
+import { ViewStyle, StyleProp } from 'react-native';
 import { Button } from 'react-native-paper';
 import { appTheme, semanticColors } from '../../theme/app-theme';
+import { styles } from './styles/app-button.styles';
 
 export type AppButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
 
@@ -86,19 +87,3 @@ export const AppButton: React.FC<AppButtonProps> = ({
     </Button>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    borderRadius: 12,
-    marginVertical: 4,
-  },
-  outlinedBorder: {
-    borderColor: appTheme.colors.primary,
-    borderWidth: 1.5,
-  },
-  label: {
-    fontSize: 15,
-    fontWeight: '600',
-    paddingVertical: 2,
-  },
-});

@@ -226,12 +226,14 @@ todo-list-mobile-ipss/
     │           └── task-adapter.factory.ts # Resolución dinámica según Feature Flag
     ├── components/
     │   ├── ui/                       # Componentes Atómicos Reutilizables (Design System)
+    │   │   ├── styles/               # Hojas de estilo separadas (*.styles.ts)
     │   │   ├── AppCard.tsx
     │   │   ├── AppButton.tsx
     │   │   ├── AppInput.tsx
     │   │   ├── AppBadge.tsx
     │   │   └── AppConfirmDialog.tsx
     │   └── tasks/                    # Componentes de Dominio To-Do
+    │       ├── styles/               # Hojas de estilo separadas (*.styles.ts)
     │       ├── TaskHeader.tsx
     │       ├── TaskFilterTabs.tsx
     │       ├── TaskItem.tsx
@@ -239,6 +241,8 @@ todo-list-mobile-ipss/
     │       └── TaskEmptyState.tsx
     ├── hooks/
     │   └── useTasks.ts               # Custom Hook de Estado y Operaciones
+    ├── styles/
+    │   └── app.styles.ts             # Estilos globales de layout
     └── theme/
         └── app-theme.ts              # Tokens y Colores de Material Design 3
 ```

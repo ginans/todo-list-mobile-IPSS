@@ -1,7 +1,7 @@
 import React from 'react';
-import { StyleSheet, ViewStyle, StyleProp } from 'react-native';
+import { ViewStyle, StyleProp } from 'react-native';
 import { Card } from 'react-native-paper';
-import { semanticColors } from '../../theme/app-theme';
+import { styles } from './styles/app-card.styles';
 
 interface AppCardProps {
   children: React.ReactNode;
@@ -31,18 +31,3 @@ export const AppCard: React.FC<AppCardProps> = ({
     </Card>
   );
 };
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: semanticColors.border,
-    marginVertical: 6,
-    overflow: 'hidden',
-  },
-  content: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-});

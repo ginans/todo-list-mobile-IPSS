@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { Text, View, ScrollView } from 'react-native';
 import { Modal, Portal, SegmentedButtons } from 'react-native-paper';
 import { ITask } from '../../core/task/interfaces/task.interface';
 import { TaskPriority } from '../../core/task/enums/task-priority.enum';
@@ -7,7 +7,7 @@ import { CreateTaskInput } from '../../core/task/types/create-task.type';
 import { UpdateTaskInput } from '../../core/task/types/update-task.type';
 import { AppInput } from '../ui/AppInput';
 import { AppButton } from '../ui/AppButton';
-import { semanticColors } from '../../theme/app-theme';
+import { styles } from './styles/task-form-modal.styles';
 
 interface TaskFormModalProps {
   visible: boolean;
@@ -161,46 +161,3 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     </Portal>
   );
 };
-
-const styles = StyleSheet.create({
-  modalContainer: {
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 20,
-    borderRadius: 20,
-    padding: 20,
-    maxHeight: '85%',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#0F172A',
-  },
-  subtitle: {
-    fontSize: 13,
-    color: semanticColors.mutedText,
-    marginTop: 4,
-    marginBottom: 12,
-  },
-  prioritySection: {
-    marginVertical: 10,
-  },
-  priorityLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#334155',
-    marginBottom: 6,
-  },
-  segmented: {
-    backgroundColor: '#F8FAFC',
-  },
-  actionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    marginTop: 18,
-    gap: 8,
-  },
-  actionButton: {
-    minWidth: 110,
-  },
-});
