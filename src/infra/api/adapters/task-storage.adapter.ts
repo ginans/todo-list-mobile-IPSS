@@ -61,7 +61,7 @@ export class TaskStorageAdapter implements ITaskRepository {
     const newTask: ITask = {
       id: `task-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       title: input.title.trim(),
-      description: input.description.trim(),
+      description: input.description?.trim() || '',
       status: input.status || TaskStatus.PENDING,
       priority: input.priority || TaskPriority.MEDIUM,
       createdAt: now,

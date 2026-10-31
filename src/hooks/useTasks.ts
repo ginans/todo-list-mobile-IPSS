@@ -117,7 +117,7 @@ export const useTasks = () => {
       const matchesSearch =
         !cleanQuery ||
         task.title.toLowerCase().includes(cleanQuery) ||
-        task.description.toLowerCase().includes(cleanQuery);
+        Boolean(task.description?.toLowerCase().includes(cleanQuery));
 
       return matchesStatus && matchesSearch;
     });

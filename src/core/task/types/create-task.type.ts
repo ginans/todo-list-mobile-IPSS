@@ -3,7 +3,7 @@ import { TaskStatus } from '../enums/task-status.enum';
 
 export type CreateTaskInput = {
   title: string;
-  description: string;
+  description?: string;
   priority?: TaskPriority;
   status?: TaskStatus;
 };

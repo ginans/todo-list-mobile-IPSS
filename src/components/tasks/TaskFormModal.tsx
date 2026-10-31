@@ -29,13 +29,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<TaskPriority>(TaskPriority.MEDIUM);
-  const [errors, setErrors] = useState<{ title?: string; description?: string }>({});
+  const [errors, setErrors] = useState<{ title?: string }>({});
 
   useEffect(() => {
     if (visible) {
       if (initialTask) {
         setTitle(initialTask.title);
-        setDescription(initialTask.description);
+        setDescription(initialTask.description || '');
         setPriority(initialTask.priority);
       } else {
         setTitle('');
@@ -47,18 +47,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   }, [visible, initialTask]);
 
   const validate = (): boolean => {
-    const newErrors: { title?: string; description?: string } = {};
+    const newErrors: { title?: string } = {};
 
     if (!title.trim()) {
       newErrors.title = 'El título de la tarea es obligatorio.';
     } else if (title.trim().length < 3) {
       newErrors.title = 'El título debe tener al menos 3 caracteres.';
-    }
-
-    if (!description.trim()) {
-      newErrors.description = 'La descripción es obligatoria.';
-    } else if (description.trim().length < 5) {
-      newErrors.description = 'La descripción debe tener al menos 5 caracteres.';
     }
 
     setErrors(newErrors);
@@ -94,7 +88,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
           <Text style={styles.subtitle}>
             {isEditing
               ? 'Modifica los datos de la tarea seleccionada.'
-              : 'Ingresa el título y descripción para agregarla a tu lista.'}
+              : 'Ingresa el título y, si deseas, una descripción adicional.'}
           </Text>
 
           <AppInput
@@ -103,7 +97,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             value={title}
             onChangeText={(text) => {
               setTitle(text);
-              if (errors.title) setErrors((prev) => ({ ...prev, title: undefined }));
+              if (errors.title) setErrors({});
             }}
             error={errors.title}
             maxLength={60}
@@ -111,14 +105,10 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
           />
 
           <AppInput
-            label="Descripción *"
+            label="Descripción (opcional)"
             placeholder="Detalles sobre lo que debes realizar..."
             value={description}
-            onChangeText={(text) => {
-              setDescription(text);
-              if (errors.description) setErrors((prev) => ({ ...prev, description: undefined }));
-            }}
-            error={errors.description}
+            onChangeText={setDescription}
             multiline
             numberOfLines={3}
             maxLength={200}

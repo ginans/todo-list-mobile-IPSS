@@ -4,7 +4,7 @@ import { TaskStatus } from '../enums/task-status.enum';
 export interface ITask {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   status: TaskStatus;
   priority: TaskPriority;
   createdAt: string;

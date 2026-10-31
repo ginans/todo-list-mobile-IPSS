@@ -22,6 +22,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   onDelete,
 }) => {
   const isCompleted = task.status === TaskStatus.COMPLETED;
+  const hasDescription = Boolean(task.description?.trim());
 
   const formatDate = (isoString: string) => {
     try {
@@ -87,9 +88,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         </View>
       </View>
 
-      <Text style={[styles.description, isCompleted && styles.descriptionCompleted]}>
-        {task.description}
-      </Text>
+      {hasDescription && (
+        <Text style={[styles.description, isCompleted && styles.descriptionCompleted]}>
+          {task.description}
+        </Text>
+      )}
 
       <View style={styles.footerRow}>
         <Text style={styles.dateText}>Creada: {formatDate(task.createdAt)}</Text>
