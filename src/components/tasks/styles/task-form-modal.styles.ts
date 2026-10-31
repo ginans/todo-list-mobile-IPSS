@@ -9,6 +9,7 @@ export const styles = StyleSheet.create({
     padding: 20,
     maxHeight: '85%',
     borderWidth: 1,
+    borderBottomWidth: 3,
     borderColor: semanticColors.border,
   },
   title: {
@@ -27,12 +28,34 @@ export const styles = StyleSheet.create({
   },
   priorityLabel: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
     color: paperPalette.inkMedium,
-    marginBottom: 6,
+    marginBottom: 8,
   },
-  segmented: {
-    backgroundColor: paperPalette.paperBg,
+  priorityRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  priorityButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    backgroundColor: paperPalette.paperSheet,
+    borderWidth: 1.5,
+    borderBottomWidth: 2.5,
+    borderColor: semanticColors.border,
+  },
+  priorityButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  priorityButtonTextActive: {
+    fontWeight: '800',
   },
   actionsContainer: {
     flexDirection: 'row',

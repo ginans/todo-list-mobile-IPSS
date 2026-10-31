@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, ScrollView } from 'react-native';
-import { Modal, Portal, SegmentedButtons } from 'react-native-paper';
+import { Text, View, ScrollView, Pressable } from 'react-native';
+import { Modal, Portal } from 'react-native-paper';
 import { ITask } from '../../core/task/interfaces/task.interface';
 import { TaskPriority } from '../../core/task/enums/task-priority.enum';
 import { CreateTaskInput } from '../../core/task/types/create-task.type';
 import { UpdateTaskInput } from '../../core/task/types/update-task.type';
 import { AppInput } from '../ui/AppInput';
 import { AppButton } from '../ui/AppButton';
+import { paperPalette, semanticColors } from '../../theme/app-theme';
 import { styles } from './styles/task-form-modal.styles';
 
 interface TaskFormModalProps {
@@ -16,6 +17,34 @@ interface TaskFormModalProps {
   initialTask?: ITask | null;
   loading?: boolean;
 }
+
+interface PriorityOption {
+  value: TaskPriority;
+  label: string;
+  color: string;
+  activeBg: string;
+}
+
+const PRIORITY_OPTIONS: PriorityOption[] = [
+  {
+    value: TaskPriority.LOW,
+    label: 'Baja',
+    color: semanticColors.success,
+    activeBg: semanticColors.successLight,
+  },
+  {
+    value: TaskPriority.MEDIUM,
+    label: 'Media',
+    color: semanticColors.warning,
+    activeBg: semanticColors.warningLight,
+  },
+  {
+    value: TaskPriority.HIGH,
+    label: 'Alta',
+    color: semanticColors.danger,
+    activeBg: semanticColors.dangerLight,
+  },
+];
 
 export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   visible,
@@ -117,16 +146,40 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
 
           <View style={styles.prioritySection}>
             <Text style={styles.priorityLabel}>Prioridad:</Text>
-            <SegmentedButtons
-              value={priority}
-              onValueChange={(val) => setPriority(val as TaskPriority)}
-              buttons={[
-                { value: TaskPriority.LOW, label: 'Baja' },
-                { value: TaskPriority.MEDIUM, label: 'Media' },
-                { value: TaskPriority.HIGH, label: 'Alta' },
-              ]}
-              style={styles.segmented}
-            />
+            <View style={styles.priorityRow}>
+              {PRIORITY_OPTIONS.map((option) => {
+                const isSelected = priority === option.value;
+
+                return (
+                  <Pressable
+                    key={option.value}
+                    onPress={() => setPriority(option.value)}
+                    disabled={loading}
+                    style={[
+                      styles.priorityButton,
+                      isSelected && {
+                        backgroundColor: option.activeBg,
+                        borderColor: option.color,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.priorityButtonText,
+                        {
+                          color: isSelected
+                            ? option.color
+                            : paperPalette.inkMedium,
+                        },
+                        isSelected && styles.priorityButtonTextActive,
+                      ]}
+                    >
+                      {option.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
 
           <View style={styles.actionsContainer}>
