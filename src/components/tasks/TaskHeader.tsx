@@ -24,6 +24,7 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
 }) => {
   return (
     <View style={styles.container}>
+      {envConfig.isDemoMode && (
       <View
         style={[
           styles.demoBanner,
@@ -45,23 +46,24 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
               },
             ]}
           >
-            {envConfig.isDemoMode
-              ? '⚡ Modo Local: Almacenamiento en dispositivo'
-              : '🌐 Modo API: Conectado a servidor remoto'}
+            
+              'Modo Demo'
+           
           </Text>
-
-          {envConfig.isDemoMode && (
             <AppButton
-              label="Restablecer Seed"
-              onPress={onResetDemo}
-              variant="outline"
-              compact
-              loading={isResetting}
-              style={styles.resetButton}
+            label="Restablecer Seed"
+            onPress={onResetDemo}
+            variant="outline"
+            compact
+            loading={isResetting}
+            style={styles.resetButton}
             />
-          )}
+          
         </View>
       </View>
+      )}
+    
+    
 
       <View style={styles.titleRow}>
         <View>

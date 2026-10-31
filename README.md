@@ -221,7 +221,7 @@ todo-list-mobile-ipss/
     ├── infra/                        # Capa de Infraestructura y Datos
     │   └── api/
     │       ├── adapters/
-    │       │   ├── task-storage.adapter.ts # Modo Local: AsyncStorage con Seed
+    │       │   ├── task-storage.adapter.ts # Modo Demo: AsyncStorage con Seed
     │       │   └── task-http.adapter.ts    # Modo API REST (NestJS ready)
     │       ├── factories/
     │       │   └── task-adapter.factory.ts # Resolución dinámica según Feature Flag
