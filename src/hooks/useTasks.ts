@@ -6,11 +6,6 @@ import { CreateTaskInput } from '../core/task/types/create-task.type';
 import { UpdateTaskInput } from '../core/task/types/update-task.type';
 import { TaskAdapterFactory } from '../infra/api/factories/task-adapter.factory';
 
-/**
- * Custom Hook: useTasks
- * Implementa el patrón Presenter/Container para desacoplar la lógica de estado
- * y orquestación de la UI, exponiendo operaciones asíncronas y métricas calculadas.
- */
 export const useTasks = () => {
   const [tasks, setTasks] = useState<ITask[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -21,7 +16,6 @@ export const useTasks = () => {
 
   const repository = useMemo(() => TaskAdapterFactory.getRepository(), []);
 
-  // Carga inicial o recarga de tareas
   const loadTasks = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -40,7 +34,6 @@ export const useTasks = () => {
     loadTasks();
   }, [loadTasks]);
 
-  // Crear tarea
   const createTask = useCallback(
     async (input: CreateTaskInput): Promise<boolean> => {
       setIsActionLoading(true);
@@ -60,7 +53,6 @@ export const useTasks = () => {
     [repository]
   );
 
-  // Actualizar tarea (editar título, descripción, etc.)
   const updateTask = useCallback(
     async (id: string, input: UpdateTaskInput): Promise<boolean> => {
       setIsActionLoading(true);
@@ -80,7 +72,6 @@ export const useTasks = () => {
     [repository]
   );
 
-  // Alternar estado completado/pendiente
   const toggleStatus = useCallback(
     async (id: string): Promise<boolean> => {
       const target = tasks.find((t) => t.id === id);
@@ -96,7 +87,6 @@ export const useTasks = () => {
     [tasks, updateTask]
   );
 
-  // Eliminar tarea
   const deleteTask = useCallback(
     async (id: string): Promise<boolean> => {
       setIsActionLoading(true);
@@ -118,43 +108,21 @@ export const useTasks = () => {
     [repository]
   );
 
-  // Restablecer datos semilla (modo demo)
-  const resetToMockData = useCallback(async (): Promise<boolean> => {
-    if (!repository.resetToMock) return false;
-    setIsLoading(true);
-    setError(null);
-    try {
-      const resetTasks = await repository.resetToMock();
-      setTasks(resetTasks);
-      return true;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al restablecer datos demo.';
-      setError(message);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [repository]);
-
-  // Lista filtrada y con búsqueda
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
-      // Filtro de estado
       const matchesStatus =
         filter === 'ALL' ? true : task.status === filter;
 
-      // Filtro de búsqueda textual (título o descripción)
       const cleanQuery = searchQuery.trim().toLowerCase();
       const matchesSearch =
         !cleanQuery ||
         task.title.toLowerCase().includes(cleanQuery) ||
-        task.description.toLowerCase().includes(cleanQuery);
+        Boolean(task.description?.toLowerCase().includes(cleanQuery));
 
       return matchesStatus && matchesSearch;
     });
   }, [tasks, filter, searchQuery]);
 
-  // Estadísticas calculadas (progreso de usuario)
   const stats = useMemo(() => {
     const total = tasks.length;
     const completed = tasks.filter((t) => t.status === TaskStatus.COMPLETED).length;
@@ -187,6 +155,5 @@ export const useTasks = () => {
     updateTask,
     deleteTask,
     toggleStatus,
-    resetToMockData,
   };
 };

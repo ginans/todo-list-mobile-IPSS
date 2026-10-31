@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
-import { Modal, Portal, SegmentedButtons } from 'react-native-paper';
+import { Text, View, ScrollView, Pressable } from 'react-native';
+import { Modal, Portal } from 'react-native-paper';
 import { ITask } from '../../core/task/interfaces/task.interface';
 import { TaskPriority } from '../../core/task/enums/task-priority.enum';
 import { CreateTaskInput } from '../../core/task/types/create-task.type';
 import { UpdateTaskInput } from '../../core/task/types/update-task.type';
 import { AppInput } from '../ui/AppInput';
 import { AppButton } from '../ui/AppButton';
-import { appTheme, semanticColors } from '../../theme/app-theme';
+import { paperPalette, semanticColors } from '../../theme/app-theme';
+import { styles } from './styles/task-form-modal.styles';
 
 interface TaskFormModalProps {
   visible: boolean;
@@ -17,12 +18,34 @@ interface TaskFormModalProps {
   loading?: boolean;
 }
 
-/**
- * Componente: TaskFormModal
- * Modal responsivo para creación y edición de tareas.
- * Aplica validaciones de formulario en tiempo real, limpieza automática
- * al guardar y componentes UI reutilizables (AppInput, AppButton).
- */
+interface PriorityOption {
+  value: TaskPriority;
+  label: string;
+  color: string;
+  activeBg: string;
+}
+
+const PRIORITY_OPTIONS: PriorityOption[] = [
+  {
+    value: TaskPriority.LOW,
+    label: 'Baja',
+    color: semanticColors.success,
+    activeBg: semanticColors.successLight,
+  },
+  {
+    value: TaskPriority.MEDIUM,
+    label: 'Media',
+    color: semanticColors.warning,
+    activeBg: semanticColors.warningLight,
+  },
+  {
+    value: TaskPriority.HIGH,
+    label: 'Alta',
+    color: semanticColors.danger,
+    activeBg: semanticColors.dangerLight,
+  },
+];
+
 export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   visible,
   onDismiss,
@@ -35,14 +58,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<TaskPriority>(TaskPriority.MEDIUM);
-
-  const [errors, setErrors] = useState<{ title?: string; description?: string }>({});
+  const [errors, setErrors] = useState<{ title?: string }>({});
 
   useEffect(() => {
     if (visible) {
       if (initialTask) {
         setTitle(initialTask.title);
-        setDescription(initialTask.description);
+        setDescription(initialTask.description || '');
         setPriority(initialTask.priority);
       } else {
         setTitle('');
@@ -54,18 +76,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   }, [visible, initialTask]);
 
   const validate = (): boolean => {
-    const newErrors: { title?: string; description?: string } = {};
+    const newErrors: { title?: string } = {};
 
     if (!title.trim()) {
       newErrors.title = 'El título de la tarea es obligatorio.';
     } else if (title.trim().length < 3) {
       newErrors.title = 'El título debe tener al menos 3 caracteres.';
-    }
-
-    if (!description.trim()) {
-      newErrors.description = 'La descripción es obligatoria.';
-    } else if (description.trim().length < 5) {
-      newErrors.description = 'La descripción debe tener al menos 5 caracteres.';
     }
 
     setErrors(newErrors);
@@ -101,55 +117,71 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
           <Text style={styles.subtitle}>
             {isEditing
               ? 'Modifica los datos de la tarea seleccionada.'
-              : 'Ingresa el título y descripción para agregarla a tu lista.'}
+              : 'Ingresa el título y, si deseas, una descripción adicional.'}
           </Text>
 
-          {/* Campo Título */}
           <AppInput
             label="Título *"
-            placeholder="Ej: Repasar conceptos de React Native"
+            placeholder="Ej: Comprar café o revisar pendientes"
             value={title}
             onChangeText={(text) => {
               setTitle(text);
-              if (errors.title) setErrors((prev) => ({ ...prev, title: undefined }));
+              if (errors.title) setErrors({});
             }}
             error={errors.title}
             maxLength={60}
             disabled={loading}
           />
 
-          {/* Campo Descripción */}
           <AppInput
-            label="Descripción *"
+            label="Descripción (opcional)"
             placeholder="Detalles sobre lo que debes realizar..."
             value={description}
-            onChangeText={(text) => {
-              setDescription(text);
-              if (errors.description) setErrors((prev) => ({ ...prev, description: undefined }));
-            }}
-            error={errors.description}
+            onChangeText={setDescription}
             multiline
             numberOfLines={3}
             maxLength={200}
             disabled={loading}
           />
 
-          {/* Selector de Prioridad */}
           <View style={styles.prioritySection}>
             <Text style={styles.priorityLabel}>Prioridad:</Text>
-            <SegmentedButtons
-              value={priority}
-              onValueChange={(val) => setPriority(val as TaskPriority)}
-              buttons={[
-                { value: TaskPriority.LOW, label: 'Baja' },
-                { value: TaskPriority.MEDIUM, label: 'Media' },
-                { value: TaskPriority.HIGH, label: 'Alta' },
-              ]}
-              style={styles.segmented}
-            />
+            <View style={styles.priorityRow}>
+              {PRIORITY_OPTIONS.map((option) => {
+                const isSelected = priority === option.value;
+
+                return (
+                  <Pressable
+                    key={option.value}
+                    onPress={() => setPriority(option.value)}
+                    disabled={loading}
+                    style={[
+                      styles.priorityButton,
+                      isSelected && {
+                        backgroundColor: option.activeBg,
+                        borderColor: option.color,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.priorityButtonText,
+                        {
+                          color: isSelected
+                            ? option.color
+                            : paperPalette.inkMedium,
+                        },
+                        isSelected && styles.priorityButtonTextActive,
+                      ]}
+                    >
+                      {option.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
 
-          {/* Acciones */}
           <View style={styles.actionsContainer}>
             <AppButton
               label="Cancelar"
@@ -172,46 +204,3 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     </Portal>
   );
 };
-
-const styles = StyleSheet.create({
-  modalContainer: {
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 20,
-    borderRadius: 20,
-    padding: 20,
-    maxHeight: '85%',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#0F172A',
-  },
-  subtitle: {
-    fontSize: 13,
-    color: semanticColors.mutedText,
-    marginTop: 4,
-    marginBottom: 12,
-  },
-  prioritySection: {
-    marginVertical: 10,
-  },
-  priorityLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#334155',
-    marginBottom: 6,
-  },
-  segmented: {
-    backgroundColor: '#F8FAFC',
-  },
-  actionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    marginTop: 18,
-    gap: 8,
-  },
-  actionButton: {
-    minWidth: 110,
-  },
-});

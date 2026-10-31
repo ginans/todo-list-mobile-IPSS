@@ -20,6 +20,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d1c4a391-0ff5-43e0-9e19-594640a7f7f1"
+      }
+    },
+    "owner": "ginanss-team"
   }
 }

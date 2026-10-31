@@ -3,11 +3,6 @@ import { ITaskRepository } from '../../../core/task/interfaces/task-repository.i
 import { CreateTaskInput } from '../../../core/task/types/create-task.type';
 import { UpdateTaskInput } from '../../../core/task/types/update-task.type';
 
-/**
- * Adaptador HTTP para conectar a Backend REST (NestJS / Express)
- * Diseñado para activarse cuando EXPO_PUBLIC_DEMO_MODE=false
- * Cumple con el mismo contrato ITaskRepository para no alterar la UI.
- */
 export class TaskHttpAdapter implements ITaskRepository {
   constructor(private readonly baseUrl: string) {}
 

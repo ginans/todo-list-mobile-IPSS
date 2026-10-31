@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, View, ViewStyle, StyleProp } from 'react-native';
+import { View, ViewStyle, StyleProp } from 'react-native';
 import { TextInput, HelperText } from 'react-native-paper';
 import { appTheme, semanticColors } from '../../theme/app-theme';
+import { styles } from './styles/app-input.styles';
 
 interface AppInputProps {
   label: string;
@@ -17,10 +18,6 @@ interface AppInputProps {
   style?: StyleProp<ViewStyle>;
 }
 
-/**
- * Componente Reutilizable: AppInput
- * Campo de texto accesible con labels flotantes, control de errores y contador.
- */
 export const AppInput: React.FC<AppInputProps> = ({
   label,
   value,
@@ -68,19 +65,3 @@ export const AppInput: React.FC<AppInputProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 6,
-    width: '100%',
-  },
-  input: {
-    backgroundColor: '#FFFFFF',
-    fontSize: 15,
-  },
-  helper: {
-    paddingHorizontal: 4,
-    paddingTop: 2,
-    fontSize: 12,
-  },
-});

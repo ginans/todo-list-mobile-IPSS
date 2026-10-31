@@ -1,8 +1,9 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { IconButton } from 'react-native-paper';
-import { appTheme, semanticColors } from '../../theme/app-theme';
+import { appTheme } from '../../theme/app-theme';
 import { AppButton } from '../ui/AppButton';
+import { styles } from './styles/task-empty-state.styles';
 
 interface TaskEmptyStateProps {
   hasFilters: boolean;
@@ -10,11 +11,6 @@ interface TaskEmptyStateProps {
   onAddTask?: () => void;
 }
 
-/**
- * Componente: TaskEmptyState
- * Estado vacío amigable e ilustrativo para guiar al usuario
- * cuando no existen tareas creadas o cuando un filtro no arroja resultados.
- */
 export const TaskEmptyState: React.FC<TaskEmptyStateProps> = ({
   hasFilters,
   onClearFilters,
@@ -61,40 +57,3 @@ export const TaskEmptyState: React.FC<TaskEmptyStateProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-    paddingVertical: 48,
-  },
-  iconCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: '#EFF6FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#DBEAFE',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#0F172A',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  description: {
-    fontSize: 14,
-    color: semanticColors.mutedText,
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-  actionButton: {
-    marginTop: 8,
-  },
-});
