@@ -45,15 +45,15 @@ export const AppBadge: React.FC<AppBadgeProps> = ({
     }
     if (value === TaskPriority.MEDIUM) {
       return {
-        bg: semanticColors.infoLight,
-        text: semanticColors.info,
+        bg: semanticColors.warningLight,
+        text: semanticColors.warning,
         displayText: label || 'Media',
       };
     }
     if (value === TaskPriority.LOW) {
       return {
-        bg: paperPalette.paperMuted,
-        text: semanticColors.mutedText,
+        bg: semanticColors.successLight,
+        text: semanticColors.success,
         displayText: label || 'Baja',
       };
     }
