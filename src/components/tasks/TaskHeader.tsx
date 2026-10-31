@@ -1,6 +1,5 @@
 import React from 'react';
 import { Text, View } from 'react-native';
-import { ProgressBar } from 'react-native-paper';
 import { appTheme, semanticColors } from '../../theme/app-theme';
 import { styles } from './styles/task-header.styles';
 
@@ -18,14 +17,8 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({ stats }) => {
   return (
     <View style={styles.container}>
       <View style={styles.titleRow}>
-        <View>
-          <Text style={styles.title}>Mis Tareas</Text>
-          <Text style={styles.subtitle}>Organiza tus pendientes diarios</Text>
-        </View>
-        <View style={styles.badgeContainer}>
-          <Text style={styles.badgeNumber}>{stats.pending}</Text>
-          <Text style={styles.badgeLabel}>Pendientes</Text>
-        </View>
+        <Text style={styles.title}>Mis Tareas</Text>
+        <Text style={styles.subtitle}>Organiza tus pendientes diarios</Text>
       </View>
 
       <View style={styles.progressCard}>
@@ -33,23 +26,43 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({ stats }) => {
           <Text style={styles.progressText}>Progreso general</Text>
           <Text style={styles.progressPercent}>{stats.progressPercentage}%</Text>
         </View>
-        <ProgressBar
-          progress={stats.progress}
-          color={stats.progressPercentage === 100 ? semanticColors.success : appTheme.colors.primary}
-          style={styles.progressBar}
-        />
-        <View style={styles.statsRow}>
-          <Text style={styles.statItem}>
-            Total: <Text style={styles.statBold}>{stats.total}</Text>
-          </Text>
-          <Text style={styles.statSeparator}>•</Text>
-          <Text style={styles.statItem}>
-            Completadas: <Text style={[styles.statBold, { color: semanticColors.success }]}>{stats.completed}</Text>
-          </Text>
-          <Text style={styles.statSeparator}>•</Text>
-          <Text style={styles.statItem}>
-            Pendientes: <Text style={[styles.statBold, { color: semanticColors.warning }]}>{stats.pending}</Text>
-          </Text>
+
+        <View style={styles.progressTrack}>
+          <View
+            style={[
+              styles.progressFill,
+              {
+                width: `${stats.progressPercentage}%`,
+                backgroundColor:
+                  stats.progressPercentage === 100
+                    ? semanticColors.success
+                    : appTheme.colors.primary,
+              },
+            ]}
+          />
+        </View>
+
+        <View style={styles.statsBoxesRow}>
+          <View style={[styles.statBox, styles.statBoxTotal]}>
+            <Text style={[styles.statBoxNumber, { color: appTheme.colors.primary }]}>
+              {stats.total}
+            </Text>
+            <Text style={styles.statBoxLabel}>Totales</Text>
+          </View>
+
+          <View style={[styles.statBox, styles.statBoxPending]}>
+            <Text style={[styles.statBoxNumber, { color: semanticColors.warning }]}>
+              {stats.pending}
+            </Text>
+            <Text style={styles.statBoxLabel}>Pendientes</Text>
+          </View>
+
+          <View style={[styles.statBox, styles.statBoxCompleted]}>
+            <Text style={[styles.statBoxNumber, { color: semanticColors.success }]}>
+              {stats.completed}
+            </Text>
+            <Text style={styles.statBoxLabel}>Completadas</Text>
+          </View>
         </View>
       </View>
     </View>

@@ -8,10 +8,7 @@ export const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   titleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
   },
   title: {
     fontSize: 26,
@@ -24,26 +21,6 @@ export const styles = StyleSheet.create({
     color: semanticColors.mutedText,
     marginTop: 2,
     fontWeight: '500',
-  },
-  badgeContainer: {
-    backgroundColor: '#EFF6FF',
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#BFDBFE',
-  },
-  badgeNumber: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: appTheme.colors.primary,
-  },
-  badgeLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: semanticColors.mutedText,
-    textTransform: 'uppercase',
   },
   progressCard: {
     backgroundColor: '#FFFFFF',
@@ -73,27 +50,51 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     color: appTheme.colors.primary,
   },
-  progressBar: {
+  progressTrack: {
     height: 8,
+    width: '100%',
     borderRadius: 4,
     backgroundColor: '#E2E8F0',
+    overflow: 'hidden',
   },
-  statsRow: {
+  progressFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  statsBoxesRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    gap: 8,
+    marginTop: 12,
+  },
+  statBox: {
+    flex: 1,
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
     alignItems: 'center',
-    marginTop: 10,
+    borderWidth: 1,
   },
-  statItem: {
-    fontSize: 12,
-    color: semanticColors.mutedText,
+  statBoxTotal: {
+    backgroundColor: '#EFF6FF',
+    borderColor: '#BFDBFE',
   },
-  statBold: {
+  statBoxPending: {
+    backgroundColor: '#FFFBEB',
+    borderColor: '#FDE68A',
+  },
+  statBoxCompleted: {
+    backgroundColor: '#F0FDF4',
+    borderColor: '#BBF7D0',
+  },
+  statBoxNumber: {
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  statBoxLabel: {
+    fontSize: 10,
     fontWeight: '700',
-    color: '#0F172A',
-  },
-  statSeparator: {
-    marginHorizontal: 8,
-    color: '#CBD5E1',
+    color: semanticColors.mutedText,
+    textTransform: 'uppercase',
+    marginTop: 2,
   },
 });
