@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { semanticColors } from '../../../theme/app-theme';
+import { paperPalette, semanticColors } from '../../../theme/app-theme';
 
 export const styles = StyleSheet.create({
   container: {
@@ -7,8 +7,9 @@ export const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   searchbar: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: paperPalette.paperSheet,
     borderWidth: 1,
+    borderBottomWidth: 2,
     borderColor: semanticColors.border,
     borderRadius: 12,
     marginBottom: 10,
@@ -17,6 +18,7 @@ export const styles = StyleSheet.create({
   searchInput: {
     fontSize: 14,
     minHeight: 0,
+    color: paperPalette.inkDark,
   },
   tabsRow: {
     flexDirection: 'row',
@@ -31,7 +33,7 @@ export const styles = StyleSheet.create({
     paddingVertical: 9,
     paddingHorizontal: 8,
     borderRadius: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: paperPalette.paperSheet,
     borderWidth: 1.5,
     borderColor: semanticColors.border,
   },

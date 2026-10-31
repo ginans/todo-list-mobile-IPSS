@@ -1,16 +1,18 @@
 import { StyleSheet } from 'react-native';
-import { semanticColors } from '../../../theme/app-theme';
+import { paperPalette, semanticColors } from '../../../theme/app-theme';
 
 export const styles = StyleSheet.create({
   dialog: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    backgroundColor: paperPalette.paperSheet,
+    borderRadius: 18,
     paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: semanticColors.border,
   },
   title: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#0F172A',
+    color: paperPalette.inkDark,
   },
   message: {
     fontSize: 14,

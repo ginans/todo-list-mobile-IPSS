@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { semanticColors } from '../../../theme/app-theme';
+import { paperPalette, semanticColors } from '../../../theme/app-theme';
 
 export const styles = StyleSheet.create({
   container: {
@@ -12,17 +12,17 @@ export const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: '#EFF6FF',
+    backgroundColor: paperPalette.accentPrimaryLight,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#DBEAFE',
+    borderColor: '#E2CEBE',
   },
   title: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#0F172A',
+    color: paperPalette.inkDark,
     textAlign: 'center',
     marginBottom: 8,
   },

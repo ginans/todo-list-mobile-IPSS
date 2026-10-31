@@ -1,18 +1,20 @@
 import { StyleSheet } from 'react-native';
-import { semanticColors } from '../../../theme/app-theme';
+import { paperPalette, semanticColors } from '../../../theme/app-theme';
 
 export const styles = StyleSheet.create({
   modalContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: paperPalette.paperSheet,
     marginHorizontal: 20,
     borderRadius: 20,
     padding: 20,
     maxHeight: '85%',
+    borderWidth: 1,
+    borderColor: semanticColors.border,
   },
   title: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#0F172A',
+    color: paperPalette.inkDark,
   },
   subtitle: {
     fontSize: 13,
@@ -26,11 +28,11 @@ export const styles = StyleSheet.create({
   priorityLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#334155',
+    color: paperPalette.inkMedium,
     marginBottom: 6,
   },
   segmented: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: paperPalette.paperBg,
   },
   actionsContainer: {
     flexDirection: 'row',

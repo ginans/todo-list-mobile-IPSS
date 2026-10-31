@@ -5,6 +5,7 @@ import {
   RefreshControl,
   KeyboardAvoidingView,
   Platform,
+  ImageBackground,
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { PaperProvider, FAB, Snackbar, ActivityIndicator } from 'react-native-paper';
@@ -23,6 +24,8 @@ import { TaskFormModal } from './src/components/tasks/TaskFormModal';
 import { TaskEmptyState } from './src/components/tasks/TaskEmptyState';
 import { AppConfirmDialog } from './src/components/ui/AppConfirmDialog';
 import { styles } from './src/styles/app.styles';
+
+const paperTexture = require('./assets/paper-texture.png');
 
 export default function App() {
   const {
@@ -92,105 +95,111 @@ export default function App() {
     <SafeAreaProvider>
       <PaperProvider theme={appTheme}>
         <StatusBar style="dark" />
-        <SafeAreaView style={styles.safeArea}>
-          <KeyboardAvoidingView
-            style={styles.keyboardContainer}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          >
-            <TaskHeader stats={stats} />
-
-            <TaskFilterTabs
-              filter={filter}
-              onFilterChange={setFilter}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              counts={{
-                all: allTasksCount,
-                pending: stats.pending,
-                completed: stats.completed,
-              }}
-            />
-
-            {isLoading && tasks.length === 0 ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={appTheme.colors.primary} />
-              </View>
-            ) : (
-              <FlatList
-                data={tasks}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                  <TaskItem
-                    task={item}
-                    onToggleStatus={toggleStatus}
-                    onEdit={handleOpenEdit}
-                    onDelete={setTaskToDelete}
-                  />
-                )}
-                contentContainerStyle={styles.listContent}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={isLoading}
-                    onRefresh={loadTasks}
-                    colors={[appTheme.colors.primary]}
-                    tintColor={appTheme.colors.primary}
-                  />
-                }
-                ListEmptyComponent={
-                  <TaskEmptyState
-                    hasFilters={filter !== 'ALL' || Boolean(searchQuery)}
-                    onClearFilters={() => {
-                      setFilter('ALL');
-                      setSearchQuery('');
-                    }}
-                    onAddTask={handleOpenCreate}
-                  />
-                }
-              />
-            )}
-
-            <FAB
-              icon="plus"
-              label="Nueva Tarea"
-              onPress={handleOpenCreate}
-              style={styles.fab}
-              color="#FFFFFF"
-            />
-
-            <TaskFormModal
-              visible={isFormModalVisible}
-              onDismiss={() => setIsFormModalVisible(false)}
-              onSubmit={handleFormSubmit}
-              initialTask={editingTask}
-              loading={isActionLoading}
-            />
-
-            <AppConfirmDialog
-              visible={Boolean(taskToDelete)}
-              title="¿Eliminar esta tarea?"
-              message={
-                taskToDelete
-                  ? `Se eliminará permanentemente la tarea "${taskToDelete.title}". Esta acción no se puede deshacer.`
-                  : ''
-              }
-              confirmLabel="Eliminar"
-              cancelLabel="Cancelar"
-              isDestructive
-              onConfirm={handleConfirmDelete}
-              onCancel={() => setTaskToDelete(null)}
-              loading={isActionLoading}
-            />
-
-            <Snackbar
-              visible={Boolean(toastMessage)}
-              onDismiss={() => setToastMessage(null)}
-              duration={2600}
-              style={styles.snackbar}
+        <ImageBackground
+          source={paperTexture}
+          resizeMode="cover"
+          style={styles.paperBackground}
+        >
+          <SafeAreaView style={styles.safeArea}>
+            <KeyboardAvoidingView
+              style={styles.keyboardContainer}
+              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
-              {toastMessage}
-            </Snackbar>
-          </KeyboardAvoidingView>
-        </SafeAreaView>
+              <TaskHeader stats={stats} />
+
+              <TaskFilterTabs
+                filter={filter}
+                onFilterChange={setFilter}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                counts={{
+                  all: allTasksCount,
+                  pending: stats.pending,
+                  completed: stats.completed,
+                }}
+              />
+
+              {isLoading && tasks.length === 0 ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color={appTheme.colors.primary} />
+                </View>
+              ) : (
+                <FlatList
+                  data={tasks}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => (
+                    <TaskItem
+                      task={item}
+                      onToggleStatus={toggleStatus}
+                      onEdit={handleOpenEdit}
+                      onDelete={setTaskToDelete}
+                    />
+                  )}
+                  contentContainerStyle={styles.listContent}
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={isLoading}
+                      onRefresh={loadTasks}
+                      colors={[appTheme.colors.primary]}
+                      tintColor={appTheme.colors.primary}
+                    />
+                  }
+                  ListEmptyComponent={
+                    <TaskEmptyState
+                      hasFilters={filter !== 'ALL' || Boolean(searchQuery)}
+                      onClearFilters={() => {
+                        setFilter('ALL');
+                        setSearchQuery('');
+                      }}
+                      onAddTask={handleOpenCreate}
+                    />
+                  }
+                />
+              )}
+
+              <FAB
+                icon="plus"
+                label="Nueva Tarea"
+                onPress={handleOpenCreate}
+                style={styles.fab}
+                color="#FFFDF8"
+              />
+
+              <TaskFormModal
+                visible={isFormModalVisible}
+                onDismiss={() => setIsFormModalVisible(false)}
+                onSubmit={handleFormSubmit}
+                initialTask={editingTask}
+                loading={isActionLoading}
+              />
+
+              <AppConfirmDialog
+                visible={Boolean(taskToDelete)}
+                title="¿Eliminar esta tarea?"
+                message={
+                  taskToDelete
+                    ? `Se eliminará permanentemente la tarea "${taskToDelete.title}". Esta acción no se puede deshacer.`
+                    : ''
+                }
+                confirmLabel="Eliminar"
+                cancelLabel="Cancelar"
+                isDestructive
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setTaskToDelete(null)}
+                loading={isActionLoading}
+              />
+
+              <Snackbar
+                visible={Boolean(toastMessage)}
+                onDismiss={() => setToastMessage(null)}
+                duration={2600}
+                style={styles.snackbar}
+              >
+                {toastMessage}
+              </Snackbar>
+            </KeyboardAvoidingView>
+          </SafeAreaView>
+        </ImageBackground>
       </PaperProvider>
     </SafeAreaProvider>
   );

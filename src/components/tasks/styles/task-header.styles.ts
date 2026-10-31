@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { appTheme, semanticColors } from '../../../theme/app-theme';
+import { appTheme, paperPalette, semanticColors } from '../../../theme/app-theme';
 
 export const styles = StyleSheet.create({
   container: {
@@ -11,10 +11,10 @@ export const styles = StyleSheet.create({
     marginBottom: 14,
   },
   title: {
-    fontSize: 26,
+    fontSize: 27,
     fontWeight: '800',
-    color: '#0F172A',
-    letterSpacing: -0.5,
+    color: paperPalette.inkDark,
+    letterSpacing: -0.4,
   },
   subtitle: {
     fontSize: 13,
@@ -23,15 +23,16 @@ export const styles = StyleSheet.create({
     fontWeight: '500',
   },
   progressCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 253, 248, 0.90)',
     borderRadius: 16,
     padding: 14,
     borderWidth: 1,
+    borderBottomWidth: 2.5,
     borderColor: semanticColors.border,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 3,
+    shadowColor: '#5C4033',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
     elevation: 1,
   },
   progressRow: {
@@ -43,7 +44,7 @@ export const styles = StyleSheet.create({
   progressText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#334155',
+    color: paperPalette.inkMedium,
   },
   progressPercent: {
     fontSize: 14,
@@ -54,7 +55,7 @@ export const styles = StyleSheet.create({
     height: 8,
     width: '100%',
     borderRadius: 4,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: paperPalette.paperMuted,
     overflow: 'hidden',
   },
   progressFill: {
@@ -75,16 +76,16 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
   },
   statBoxTotal: {
-    backgroundColor: '#EFF6FF',
-    borderColor: '#BFDBFE',
+    backgroundColor: paperPalette.accentPrimaryLight,
+    borderColor: '#E2CEBE',
   },
   statBoxPending: {
-    backgroundColor: '#FFFBEB',
-    borderColor: '#FDE68A',
+    backgroundColor: semanticColors.warningLight,
+    borderColor: '#EED8AC',
   },
   statBoxCompleted: {
-    backgroundColor: '#F0FDF4',
-    borderColor: '#BBF7D0',
+    backgroundColor: semanticColors.successLight,
+    borderColor: '#C8DEC9',
   },
   statBoxNumber: {
     fontSize: 18,
@@ -93,7 +94,7 @@ export const styles = StyleSheet.create({
   statBoxLabel: {
     fontSize: 10,
     fontWeight: '700',
-    color: semanticColors.mutedText,
+    color: paperPalette.inkMedium,
     textTransform: 'uppercase',
     marginTop: 2,
   },

@@ -1,15 +1,18 @@
 import { StyleSheet } from 'react-native';
-import { semanticColors } from '../../../theme/app-theme';
+import { paperPalette, semanticColors } from '../../../theme/app-theme';
 
 export const styles = StyleSheet.create({
   card: {
     marginHorizontal: 16,
     marginVertical: 5,
+    borderLeftWidth: 4,
+    borderLeftColor: paperPalette.accentPrimary,
   },
   completedCard: {
-    backgroundColor: '#F8FAFC',
-    borderColor: '#E2E8F0',
-    opacity: 0.85,
+    backgroundColor: '#F9F5ED',
+    borderColor: paperPalette.paperLines,
+    borderLeftColor: semanticColors.success,
+    opacity: 0.88,
   },
   cardContent: {
     paddingHorizontal: 14,
@@ -29,14 +32,14 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 12,
     marginTop: 2,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: paperPalette.paperSheet,
   },
   checkboxCompleted: {
     backgroundColor: semanticColors.success,
     borderColor: semanticColors.success,
   },
   checkmark: {
-    color: '#FFFFFF',
+    color: '#FFFDF8',
     fontWeight: '800',
     fontSize: 15,
   },
@@ -47,7 +50,7 @@ export const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#0F172A',
+    color: paperPalette.inkDark,
     marginBottom: 6,
     lineHeight: 22,
   },
@@ -74,23 +77,23 @@ export const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
-    color: '#475569',
+    color: paperPalette.inkMedium,
     lineHeight: 20,
     marginLeft: 38,
     marginBottom: 8,
   },
   descriptionCompleted: {
-    color: '#94A3B8',
+    color: paperPalette.inkMuted,
   },
   footerRow: {
     marginLeft: 38,
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: paperPalette.paperMuted,
     paddingTop: 6,
   },
   dateText: {
     fontSize: 11,
-    color: '#94A3B8',
+    color: paperPalette.inkMuted,
     fontWeight: '500',
   },
 });

@@ -4,7 +4,7 @@ import { Searchbar } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { TaskFilterType } from '../../core/task/interfaces/task-filter.interface';
 import { TaskStatus } from '../../core/task/enums/task-status.enum';
-import { appTheme, semanticColors } from '../../theme/app-theme';
+import { appTheme, paperPalette, semanticColors } from '../../theme/app-theme';
 import { styles } from './styles/task-filter-tabs.styles';
 
 interface TaskFilterTabsProps {
@@ -39,7 +39,7 @@ export const TaskFilterTabs: React.FC<TaskFilterTabsProps> = ({
       label: 'Todas',
       icon: 'format-list-bulleted',
       activeColor: appTheme.colors.primary,
-      activeBg: '#DBEAFE',
+      activeBg: paperPalette.accentPrimaryLight,
     },
     {
       value: TaskStatus.PENDING,
@@ -61,6 +61,8 @@ export const TaskFilterTabs: React.FC<TaskFilterTabsProps> = ({
     <View style={styles.container}>
       <Searchbar
         placeholder="Buscar tarea por título o descripción..."
+        placeholderTextColor={paperPalette.inkMuted}
+        iconColor={paperPalette.inkMedium}
         onChangeText={onSearchChange}
         value={searchQuery}
         style={styles.searchbar}
@@ -92,7 +94,7 @@ export const TaskFilterTabs: React.FC<TaskFilterTabsProps> = ({
               <Text
                 style={[
                   styles.tabLabel,
-                  { color: isActive ? option.activeColor : '#334155' },
+                  { color: isActive ? option.activeColor : paperPalette.inkMedium },
                   isActive && styles.tabLabelActive,
                 ]}
                 numberOfLines={1}

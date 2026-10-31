@@ -1,10 +1,14 @@
 import { StyleSheet } from 'react-native';
-import { appTheme } from '../theme/app-theme';
+import { appTheme, paperPalette } from '../theme/app-theme';
 
 export const styles = StyleSheet.create({
-  safeArea: {
+  paperBackground: {
     flex: 1,
     backgroundColor: appTheme.colors.background,
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: 'transparent',
   },
   keyboardContainer: {
     flex: 1,
@@ -23,10 +27,10 @@ export const styles = StyleSheet.create({
     right: 0,
     bottom: 12,
     backgroundColor: appTheme.colors.primary,
-    borderRadius: 28,
+    borderRadius: 24,
   },
   snackbar: {
-    backgroundColor: '#0F172A',
+    backgroundColor: paperPalette.inkDark,
     borderRadius: 12,
     marginBottom: 20,
   },

@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, View, ViewStyle, StyleProp } from 'react-native';
 import { TaskStatus } from '../../core/task/enums/task-status.enum';
 import { TaskPriority } from '../../core/task/enums/task-priority.enum';
-import { semanticColors } from '../../theme/app-theme';
+import { paperPalette, semanticColors } from '../../theme/app-theme';
 import { styles } from './styles/app-badge.styles';
 
 type BadgeType = 'status' | 'priority' | 'custom';
@@ -52,7 +52,7 @@ export const AppBadge: React.FC<AppBadgeProps> = ({
     }
     if (value === TaskPriority.LOW) {
       return {
-        bg: '#F1F5F9',
+        bg: paperPalette.paperMuted,
         text: semanticColors.mutedText,
         displayText: label || 'Baja',
       };
@@ -68,7 +68,7 @@ export const AppBadge: React.FC<AppBadgeProps> = ({
       case 'info':
         return { bg: semanticColors.infoLight, text: semanticColors.info, displayText: label || String(value) };
       default:
-        return { bg: '#F1F5F9', text: semanticColors.mutedText, displayText: label || String(value) };
+        return { bg: paperPalette.paperMuted, text: semanticColors.mutedText, displayText: label || String(value) };
     }
   };
 

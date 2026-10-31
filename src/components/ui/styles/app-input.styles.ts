@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { paperPalette } from '../../../theme/app-theme';
 
 export const styles = StyleSheet.create({
   container: {
@@ -6,7 +7,7 @@ export const styles = StyleSheet.create({
     width: '100%',
   },
   input: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: paperPalette.paperSheet,
     fontSize: 15,
   },
   helper: {
