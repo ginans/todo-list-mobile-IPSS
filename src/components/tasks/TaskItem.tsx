@@ -14,12 +14,6 @@ interface TaskItemProps {
   onDelete: (task: ITask) => void;
 }
 
-/**
- * Componente: TaskItem
- * Representa visualmente una tarea individual dentro de la lista.
- * Integra AppCard y AppBadge reutilizables, y ofrece acciones directas
- * de completar, editar y eliminar con retroalimentación visual clara.
- */
 export const TaskItem: React.FC<TaskItemProps> = ({
   task,
   onToggleStatus,
@@ -48,7 +42,6 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       contentStyle={styles.cardContent}
     >
       <View style={styles.headerRow}>
-        {/* Toggle de Estado (Checkbox accesible) */}
         <Pressable
           onPress={() => onToggleStatus(task.id)}
           style={[styles.checkbox, isCompleted && styles.checkboxCompleted]}
@@ -59,7 +52,6 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           {isCompleted && <Text style={styles.checkmark}>✓</Text>}
         </Pressable>
 
-        {/* Título y Badges */}
         <View style={styles.titleArea}>
           <Text
             style={[styles.title, isCompleted && styles.titleCompleted]}
@@ -74,7 +66,6 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           </View>
         </View>
 
-        {/* Acciones: Editar y Eliminar */}
         <View style={styles.actionsRow}>
           <IconButton
             icon="pencil-outline"
@@ -95,12 +86,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         </View>
       </View>
 
-      {/* Descripción */}
       <Text style={[styles.description, isCompleted && styles.descriptionCompleted]}>
         {task.description}
       </Text>
 
-      {/* Footer con fecha de creación */}
       <View style={styles.footerRow}>
         <Text style={styles.dateText}>Creada: {formatDate(task.createdAt)}</Text>
       </View>

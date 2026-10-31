@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, ViewStyle, StyleProp } from 'react-native';
+import { StyleSheet, ViewStyle, StyleProp } from 'react-native';
 import { Card } from 'react-native-paper';
 import { semanticColors } from '../../theme/app-theme';
 
@@ -11,10 +11,6 @@ interface AppCardProps {
   elevation?: 0 | 1 | 2 | 3 | 4 | 5;
 }
 
-/**
- * Componente Reutilizable: AppCard
- * Encapsula la tarjeta visual con bordes suaves, sombra y contenedor de contenido.
- */
 export const AppCard: React.FC<AppCardProps> = ({
   children,
   style,

@@ -11,7 +11,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { PaperProvider, FAB, Snackbar, ActivityIndicator } from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
 
-import { appTheme, semanticColors } from './src/theme/app-theme';
+import { appTheme } from './src/theme/app-theme';
 import { useTasks } from './src/hooks/useTasks';
 import { ITask } from './src/core/task/interfaces/task.interface';
 import { CreateTaskInput } from './src/core/task/types/create-task.type';
@@ -43,37 +43,27 @@ export default function App() {
     resetToSeedData,
   } = useTasks();
 
-  // Estado del modal de formulario (crear / editar)
   const [isFormModalVisible, setIsFormModalVisible] = useState(false);
   const [editingTask, setEditingTask] = useState<ITask | null>(null);
-
-  // Estado del diálogo de confirmación de borrado
   const [taskToDelete, setTaskToDelete] = useState<ITask | null>(null);
-
-  // Estado del diálogo de reseteo de demo
   const [isResetConfirmVisible, setIsResetConfirmVisible] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
-
-  // Snackbar para notificaciones al usuario
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (message: string) => {
     setToastMessage(message);
   };
 
-  // Abrir modal para crear
   const handleOpenCreate = () => {
     setEditingTask(null);
     setIsFormModalVisible(true);
   };
 
-  // Abrir modal para editar
   const handleOpenEdit = (task: ITask) => {
     setEditingTask(task);
     setIsFormModalVisible(true);
   };
 
-  // Guardar creación o edición
   const handleFormSubmit = async (
     payload: CreateTaskInput | UpdateTaskInput
   ): Promise<boolean> => {
@@ -92,7 +82,6 @@ export default function App() {
     }
   };
 
-  // Confirmar y ejecutar eliminación
   const handleConfirmDelete = async () => {
     if (!taskToDelete) return;
     const success = await deleteTask(taskToDelete.id);
@@ -102,7 +91,6 @@ export default function App() {
     setTaskToDelete(null);
   };
 
-  // Confirmar y restablecer datos al seed
   const handleConfirmReset = async () => {
     setIsResetting(true);
     const success = await resetToSeedData();
@@ -122,14 +110,12 @@ export default function App() {
             style={styles.keyboardContainer}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           >
-            {/* Encabezado con Métricas, Banner Demo y Barra de Progreso */}
             <TaskHeader
               stats={stats}
               onResetDemo={() => setIsResetConfirmVisible(true)}
               isResetting={isResetting}
             />
 
-            {/* Pestañas de Filtro y Búsqueda */}
             <TaskFilterTabs
               filter={filter}
               onFilterChange={setFilter}
@@ -142,7 +128,6 @@ export default function App() {
               }}
             />
 
-            {/* Listado Principal de Tareas */}
             {isLoading && tasks.length === 0 ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={appTheme.colors.primary} />
@@ -181,7 +166,6 @@ export default function App() {
               />
             )}
 
-            {/* Botón Flotante para Crear Tarea (Material Design FAB) */}
             <FAB
               icon="plus"
               label="Nueva Tarea"
@@ -190,7 +174,6 @@ export default function App() {
               color="#FFFFFF"
             />
 
-            {/* Modal de Creación / Edición */}
             <TaskFormModal
               visible={isFormModalVisible}
               onDismiss={() => setIsFormModalVisible(false)}
@@ -199,7 +182,6 @@ export default function App() {
               loading={isActionLoading}
             />
 
-            {/* Diálogo de Confirmación para Eliminar Tarea */}
             <AppConfirmDialog
               visible={Boolean(taskToDelete)}
               title="¿Eliminar esta tarea?"
@@ -216,11 +198,10 @@ export default function App() {
               loading={isActionLoading}
             />
 
-            {/* Diálogo de Confirmación para Restablecer Datos (Seed) */}
             <AppConfirmDialog
               visible={isResetConfirmVisible}
               title="¿Restablecer Datos Iniciales?"
-              message="Se recargarán las 4 tareas iniciales del Seed y se descartarán los cambios locales actuales."
+              message="Se recargarán las tareas iniciales del Seed y se descartarán los cambios locales actuales."
               confirmLabel="Restablecer"
               cancelLabel="Cancelar"
               onConfirm={handleConfirmReset}
@@ -228,7 +209,6 @@ export default function App() {
               loading={isResetting}
             />
 
-            {/* Feedback Flotante (Toast / Snackbar) */}
             <Snackbar
               visible={Boolean(toastMessage)}
               onDismiss={() => setToastMessage(null)}
@@ -253,7 +233,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    paddingBottom: 90, // Espacio para que el FAB no tape la última tarea
+    paddingBottom: 90,
   },
   loadingContainer: {
     flex: 1,

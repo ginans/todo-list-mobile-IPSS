@@ -17,10 +17,6 @@ interface TaskFilterTabsProps {
   };
 }
 
-/**
- * Componente: TaskFilterTabs
- * Provee filtrado rápido por estado y búsqueda textual instantánea.
- */
 export const TaskFilterTabs: React.FC<TaskFilterTabsProps> = ({
   filter,
   onFilterChange,
@@ -30,7 +26,6 @@ export const TaskFilterTabs: React.FC<TaskFilterTabsProps> = ({
 }) => {
   return (
     <View style={styles.container}>
-      {/* Barra de Búsqueda */}
       <Searchbar
         placeholder="Buscar tarea por título o descripción..."
         onChangeText={onSearchChange}
@@ -40,7 +35,6 @@ export const TaskFilterTabs: React.FC<TaskFilterTabsProps> = ({
         elevation={0}
       />
 
-      {/* Botones Segmentados de Filtro */}
       <SegmentedButtons
         value={filter}
         onValueChange={(val) => onFilterChange(val as TaskFilterType)}

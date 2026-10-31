@@ -16,10 +16,6 @@ interface AppButtonProps {
   compact?: boolean;
 }
 
-/**
- * Componente Reutilizable: AppButton
- * Provee variantes estándar para acciones primarias, secundarias, de borde o destructivas.
- */
 export const AppButton: React.FC<AppButtonProps> = ({
   label,
   onPress,
@@ -59,10 +55,6 @@ export const AppButton: React.FC<AppButtonProps> = ({
           textColor: '#FFFFFF',
         };
       case 'outline':
-        return {
-          buttonColor: 'transparent',
-          textColor: appTheme.colors.primary,
-        };
       case 'ghost':
         return {
           buttonColor: 'transparent',

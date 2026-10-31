@@ -7,7 +7,7 @@ import { CreateTaskInput } from '../../core/task/types/create-task.type';
 import { UpdateTaskInput } from '../../core/task/types/update-task.type';
 import { AppInput } from '../ui/AppInput';
 import { AppButton } from '../ui/AppButton';
-import { appTheme, semanticColors } from '../../theme/app-theme';
+import { semanticColors } from '../../theme/app-theme';
 
 interface TaskFormModalProps {
   visible: boolean;
@@ -17,12 +17,6 @@ interface TaskFormModalProps {
   loading?: boolean;
 }
 
-/**
- * Componente: TaskFormModal
- * Modal responsivo para creación y edición de tareas.
- * Aplica validaciones de formulario en tiempo real, limpieza automática
- * al guardar y componentes UI reutilizables (AppInput, AppButton).
- */
 export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   visible,
   onDismiss,
@@ -35,7 +29,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<TaskPriority>(TaskPriority.MEDIUM);
-
   const [errors, setErrors] = useState<{ title?: string; description?: string }>({});
 
   useEffect(() => {
@@ -104,10 +97,9 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               : 'Ingresa el título y descripción para agregarla a tu lista.'}
           </Text>
 
-          {/* Campo Título */}
           <AppInput
             label="Título *"
-            placeholder="Ej: Repasar conceptos de React Native"
+            placeholder="Ej: Comprar café o revisar pendientes"
             value={title}
             onChangeText={(text) => {
               setTitle(text);
@@ -118,7 +110,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             disabled={loading}
           />
 
-          {/* Campo Descripción */}
           <AppInput
             label="Descripción *"
             placeholder="Detalles sobre lo que debes realizar..."
@@ -134,7 +125,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             disabled={loading}
           />
 
-          {/* Selector de Prioridad */}
           <View style={styles.prioritySection}>
             <Text style={styles.priorityLabel}>Prioridad:</Text>
             <SegmentedButtons
@@ -149,7 +139,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             />
           </View>
 
-          {/* Acciones */}
           <View style={styles.actionsContainer}>
             <AppButton
               label="Cancelar"

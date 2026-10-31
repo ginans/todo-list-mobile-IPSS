@@ -17,10 +17,6 @@ interface AppInputProps {
   style?: StyleProp<ViewStyle>;
 }
 
-/**
- * Componente Reutilizable: AppInput
- * Campo de texto accesible con labels flotantes, control de errores y contador.
- */
 export const AppInput: React.FC<AppInputProps> = ({
   label,
   value,

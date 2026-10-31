@@ -17,11 +17,6 @@ interface TaskHeaderProps {
   isResetting?: boolean;
 }
 
-/**
- * Componente: TaskHeader
- * Muestra la identidad visual de la app, banner de Feature Flag (Modo Demo)
- * y una barra de progreso que brinda feedback inmediato al usuario.
- */
 export const TaskHeader: React.FC<TaskHeaderProps> = ({
   stats,
   onResetDemo,
@@ -29,7 +24,6 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
 }) => {
   return (
     <View style={styles.container}>
-      {/* Banner de Feature Flag: Modo Demo */}
       <View
         style={[
           styles.demoBanner,
@@ -52,11 +46,10 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
             ]}
           >
             {envConfig.isDemoMode
-              ? '⚡ Modo Local: Persistencia AsyncStorage con Seed'
-              : '🌐 Modo API: Conectado a Servidor Backend'}
+              ? '⚡ Modo Local: Almacenamiento en dispositivo'
+              : '🌐 Modo API: Conectado a servidor remoto'}
           </Text>
 
-          {/* El botón de reseteo SOLO se muestra si isDemoMode === true */}
           {envConfig.isDemoMode && (
             <AppButton
               label="Restablecer Seed"
@@ -70,13 +63,10 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
         </View>
       </View>
 
-      {/* Título Principal */}
       <View style={styles.titleRow}>
         <View>
           <Text style={styles.title}>Mis Tareas</Text>
-          <Text style={styles.subtitle}>
-            IPSS • Desarrollo de Aplicaciones Móviles
-          </Text>
+          <Text style={styles.subtitle}>Organiza tus pendientes diarios</Text>
         </View>
         <View style={styles.badgeContainer}>
           <Text style={styles.badgeNumber}>{stats.pending}</Text>
@@ -84,7 +74,6 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
         </View>
       </View>
 
-      {/* Barra de Progreso y Métricas */}
       <View style={styles.progressCard}>
         <View style={styles.progressRow}>
           <Text style={styles.progressText}>Progreso general</Text>

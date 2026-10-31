@@ -16,10 +16,6 @@ interface AppConfirmDialogProps {
   loading?: boolean;
 }
 
-/**
- * Componente Reutilizable: AppConfirmDialog
- * Diálogo modal para confirmación de acciones irreversibles (borrado, reseteo).
- */
 export const AppConfirmDialog: React.FC<AppConfirmDialogProps> = ({
   visible,
   title,

@@ -1,22 +1,18 @@
 import { MD3LightTheme, MD3Theme } from 'react-native-paper';
 
-/**
- * Tema personalizado basado en Material Design 3 (React Native Paper)
- * Asegura contraste accesible (WCAG AA), balance cromático y jerarquía visual.
- */
 export const appTheme: MD3Theme = {
   ...MD3LightTheme,
   colors: {
     ...MD3LightTheme.colors,
-    primary: '#1E40AF', // Azul institucional formal (Deep Indigo)
+    primary: '#1E40AF',
     onPrimary: '#FFFFFF',
     primaryContainer: '#DBEAFE',
     onPrimaryContainer: '#1E3A8A',
-    secondary: '#0D9488', // Teal moderno para acentos secundarios
+    secondary: '#0D9488',
     onSecondary: '#FFFFFF',
     secondaryContainer: '#CCFBF1',
     onSecondaryContainer: '#115E59',
-    background: '#F8FAFC', // Slate muy suave para fondos (no blanco chillón)
+    background: '#F8FAFC',
     surface: '#FFFFFF',
     onSurface: '#0F172A',
     surfaceVariant: '#F1F5F9',

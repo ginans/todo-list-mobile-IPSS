@@ -10,11 +10,6 @@ interface TaskEmptyStateProps {
   onAddTask?: () => void;
 }
 
-/**
- * Componente: TaskEmptyState
- * Estado vacío amigable e ilustrativo para guiar al usuario
- * cuando no existen tareas creadas o cuando un filtro no arroja resultados.
- */
 export const TaskEmptyState: React.FC<TaskEmptyStateProps> = ({
   hasFilters,
   onClearFilters,

@@ -7,14 +7,9 @@ import { TaskPriority } from '../../../core/task/enums/task-priority.enum';
 import { TaskStatus } from '../../../core/task/enums/task-status.enum';
 import { TASK_SEEDS } from '../seeds/task.seed';
 
-const STORAGE_KEY = '@ipss_todo_tasks_v1';
+const STORAGE_KEY = '@todo_tasks_v1';
 const SIMULATED_LATENCY_MS = 250;
 
-/**
- * Adaptador de Almacenamiento Local (Local Storage Adapter)
- * Persiste datos en AsyncStorage (disco móvil) y ejecuta un Seeding automático
- * con tareas iniciales en el primer inicio (Cold Start).
- */
 export class TaskStorageAdapter implements ITaskRepository {
   private inMemoryTasks: ITask[] | null = null;
 
@@ -22,10 +17,6 @@ export class TaskStorageAdapter implements ITaskRepository {
     await new Promise((resolve) => setTimeout(resolve, SIMULATED_LATENCY_MS));
   }
 
-  /**
-   * Carga desde AsyncStorage. Si el almacenamiento está vacío,
-   * ejecuta el Seeding con TASK_SEEDS.
-   */
   private async loadFromStorage(): Promise<ITask[]> {
     if (this.inMemoryTasks) {
       return this.inMemoryTasks;
@@ -36,7 +27,6 @@ export class TaskStorageAdapter implements ITaskRepository {
       if (stored) {
         this.inMemoryTasks = JSON.parse(stored);
       } else {
-        // Cold Start: Seeding inicial de datos
         this.inMemoryTasks = [...TASK_SEEDS];
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(this.inMemoryTasks));
       }
@@ -126,9 +116,6 @@ export class TaskStorageAdapter implements ITaskRepository {
     return true;
   }
 
-  /**
-   * Re-ejecuta el Seeding de fábrica, descartando cambios locales.
-   */
   async resetToSeed(): Promise<ITask[]> {
     await this.simulateDelay();
     const freshSeeds = [...TASK_SEEDS];
@@ -136,4 +123,3 @@ export class TaskStorageAdapter implements ITaskRepository {
     return freshSeeds;
   }
 }
-
