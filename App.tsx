@@ -40,7 +40,7 @@ export default function App() {
     updateTask,
     deleteTask,
     toggleStatus,
-    resetToMockData,
+    resetToSeedData,
   } = useTasks();
 
   // Estado del modal de formulario (crear / editar)
@@ -102,14 +102,14 @@ export default function App() {
     setTaskToDelete(null);
   };
 
-  // Confirmar y restablecer datos demo
+  // Confirmar y restablecer datos al seed
   const handleConfirmReset = async () => {
     setIsResetting(true);
-    const success = await resetToMockData();
+    const success = await resetToSeedData();
     setIsResetting(false);
     setIsResetConfirmVisible(false);
     if (success) {
-      showToast('⚡ Datos demo restablecidos con éxito');
+      showToast('⚡ Datos restablecidos a los Seeds iniciales');
     }
   };
 
@@ -216,11 +216,11 @@ export default function App() {
               loading={isActionLoading}
             />
 
-            {/* Diálogo de Confirmación para Restablecer Datos Demo */}
+            {/* Diálogo de Confirmación para Restablecer Datos (Seed) */}
             <AppConfirmDialog
               visible={isResetConfirmVisible}
-              title="¿Restablecer Datos Demo?"
-              message="Se recargarán las 4 tareas iniciales de prueba y se descartarán los cambios locales actuales."
+              title="¿Restablecer Datos Iniciales?"
+              message="Se recargarán las 4 tareas iniciales del Seed y se descartarán los cambios locales actuales."
               confirmLabel="Restablecer"
               cancelLabel="Cancelar"
               onConfirm={handleConfirmReset}

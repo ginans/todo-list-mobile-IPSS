@@ -52,14 +52,14 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
             ]}
           >
             {envConfig.isDemoMode
-              ? '⚡ Modo Demo: Almacenamiento local simulado'
+              ? '⚡ Modo Local: Persistencia AsyncStorage con Seed'
               : '🌐 Modo API: Conectado a Servidor Backend'}
           </Text>
 
           {/* El botón de reseteo SOLO se muestra si isDemoMode === true */}
           {envConfig.isDemoMode && (
             <AppButton
-              label="Restablecer Datos"
+              label="Restablecer Seed"
               onPress={onResetDemo}
               variant="outline"
               compact

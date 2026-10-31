@@ -34,7 +34,7 @@ export interface ITaskRepository {
   delete(id: string): Promise<boolean>;
 
   /**
-   * Restablece las tareas a los datos semilla iniciales (solo aplica a almacenamiento local/demo).
+   * Restablece el almacenamiento local al estado inicial de Seed.
    */
-  resetToMock?(): Promise<ITask[]>;
+  resetToSeed?(): Promise<ITask[]>;
 }

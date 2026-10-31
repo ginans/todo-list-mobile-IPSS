@@ -5,23 +5,27 @@ import { CreateTaskInput } from '../../../core/task/types/create-task.type';
 import { UpdateTaskInput } from '../../../core/task/types/update-task.type';
 import { TaskPriority } from '../../../core/task/enums/task-priority.enum';
 import { TaskStatus } from '../../../core/task/enums/task-status.enum';
-import { INITIAL_TASKS_MOCK } from '../mocks/task.mock';
+import { TASK_SEEDS } from '../seeds/task.seed';
 
 const STORAGE_KEY = '@ipss_todo_tasks_v1';
-const SIMULATED_LATENCY_MS = 350;
+const SIMULATED_LATENCY_MS = 250;
 
 /**
- * Adaptador Mock para Modo Demo
- * Simula latencia de red real mediante Promises y persiste en AsyncStorage
- * para que los datos no se pierdan al cerrar la app durante las pruebas.
+ * Adaptador de Almacenamiento Local (Local Storage Adapter)
+ * Persiste datos en AsyncStorage (disco móvil) y ejecuta un Seeding automático
+ * con tareas iniciales en el primer inicio (Cold Start).
  */
-export class TaskMockAdapter implements ITaskRepository {
+export class TaskStorageAdapter implements ITaskRepository {
   private inMemoryTasks: ITask[] | null = null;
 
-  private async simulateNetworkDelay(): Promise<void> {
+  private async simulateDelay(): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, SIMULATED_LATENCY_MS));
   }
 
+  /**
+   * Carga desde AsyncStorage. Si el almacenamiento está vacío,
+   * ejecuta el Seeding con TASK_SEEDS.
+   */
   private async loadFromStorage(): Promise<ITask[]> {
     if (this.inMemoryTasks) {
       return this.inMemoryTasks;
@@ -32,14 +36,15 @@ export class TaskMockAdapter implements ITaskRepository {
       if (stored) {
         this.inMemoryTasks = JSON.parse(stored);
       } else {
-        this.inMemoryTasks = [...INITIAL_TASKS_MOCK];
+        // Cold Start: Seeding inicial de datos
+        this.inMemoryTasks = [...TASK_SEEDS];
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(this.inMemoryTasks));
       }
     } catch {
-      this.inMemoryTasks = [...INITIAL_TASKS_MOCK];
+      this.inMemoryTasks = [...TASK_SEEDS];
     }
 
-    return this.inMemoryTasks || [...INITIAL_TASKS_MOCK];
+    return this.inMemoryTasks || [...TASK_SEEDS];
   }
 
   private async saveToStorage(tasks: ITask[]): Promise<void> {
@@ -47,26 +52,25 @@ export class TaskMockAdapter implements ITaskRepository {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
     } catch (error) {
-      console.warn('Error al persistir en AsyncStorage:', error);
+      console.warn('[TaskStorageAdapter] Error al persistir en AsyncStorage:', error);
     }
   }
 
   async getAll(): Promise<ITask[]> {
-    await this.simulateNetworkDelay();
+    await this.simulateDelay();
     const tasks = await this.loadFromStorage();
-    // Retornamos una copia para evitar mutaciones directas
     return [...tasks];
   }
 
   async getById(id: string): Promise<ITask | null> {
-    await this.simulateNetworkDelay();
+    await this.simulateDelay();
     const tasks = await this.loadFromStorage();
     const found = tasks.find((t) => t.id === id);
     return found ? { ...found } : null;
   }
 
   async create(input: CreateTaskInput): Promise<ITask> {
-    await this.simulateNetworkDelay();
+    await this.simulateDelay();
     const tasks = await this.loadFromStorage();
 
     const now = new Date().toISOString();
@@ -86,7 +90,7 @@ export class TaskMockAdapter implements ITaskRepository {
   }
 
   async update(id: string, input: UpdateTaskInput): Promise<ITask> {
-    await this.simulateNetworkDelay();
+    await this.simulateDelay();
     const tasks = await this.loadFromStorage();
 
     const index = tasks.findIndex((t) => t.id === id);
@@ -110,7 +114,7 @@ export class TaskMockAdapter implements ITaskRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    await this.simulateNetworkDelay();
+    await this.simulateDelay();
     const tasks = await this.loadFromStorage();
 
     const filtered = tasks.filter((t) => t.id !== id);
@@ -122,10 +126,14 @@ export class TaskMockAdapter implements ITaskRepository {
     return true;
   }
 
-  async resetToMock(): Promise<ITask[]> {
-    await this.simulateNetworkDelay();
-    const freshMocks = [...INITIAL_TASKS_MOCK];
-    await this.saveToStorage(freshMocks);
-    return freshMocks;
+  /**
+   * Re-ejecuta el Seeding de fábrica, descartando cambios locales.
+   */
+  async resetToSeed(): Promise<ITask[]> {
+    await this.simulateDelay();
+    const freshSeeds = [...TASK_SEEDS];
+    await this.saveToStorage(freshSeeds);
+    return freshSeeds;
   }
 }
+

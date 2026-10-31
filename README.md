@@ -58,7 +58,7 @@ flowchart LR
 
     subgraph Infra ["Capa Infraestructura"]
         Factory["TaskAdapterFactory"]
-        Mock["TaskMockAdapter (Demo + Storage)"]
+        Storage["TaskStorageAdapter (AsyncStorage + Seed)"]
         Http["TaskHttpAdapter (API REST)"]
     end
 
@@ -66,15 +66,15 @@ flowchart LR
     Screen --> Hook
     Hook --> Port
     Hook --> Factory
-    Factory -->|DEMO_MODE=true| Mock
+    Factory -->|DEMO_MODE=true| Storage
     Factory -->|DEMO_MODE=false| Http
-    Mock -.->|implements| Port
+    Storage -.->|implements| Port
     Http -.->|implements| Port
 ```
 
 ### 1. Patrón Adapter (Adaptador de Infraestructura)
 Desacopla la lógica de acceso a datos de los componentes visuales mediante un contrato común (`ITaskRepository`).
-- **`TaskMockAdapter`:** Simula llamadas a red con latencia asíncrona controlada (`setTimeout`) y persiste en el almacenamiento local móvil (`AsyncStorage`).
+- **`TaskStorageAdapter`:** Persiste datos reales en el almacenamiento local móvil (`AsyncStorage`) y ejecuta un Seeding automático (`TASK_SEEDS`) en el primer inicio (Cold Start).
 - **`TaskHttpAdapter`:** Preconfigurado con llamadas `fetch` estándar hacia una API REST (preparado para NestJS en la Unidad 2).
 
 ```typescript
@@ -85,7 +85,7 @@ export interface ITaskRepository {
   create(input: CreateTaskInput): Promise<ITask>;
   update(id: string, input: UpdateTaskInput): Promise<ITask>;
   delete(id: string): Promise<boolean>;
-  resetToMock?(): Promise<ITask[]>;
+  resetToSeed?(): Promise<ITask[]>;
 }
 ```
 
@@ -100,7 +100,7 @@ export class TaskAdapterFactory {
   public static getRepository(): ITaskRepository {
     if (!TaskAdapterFactory.instance) {
       if (envConfig.isDemoMode) {
-        TaskAdapterFactory.instance = new TaskMockAdapter();
+        TaskAdapterFactory.instance = new TaskStorageAdapter();
       } else {
         TaskAdapterFactory.instance = new TaskHttpAdapter(envConfig.apiUrl);
       }
@@ -221,12 +221,12 @@ todo-list-mobile-ipss/
     ├── infra/                        # Capa de Infraestructura y Datos
     │   └── api/
     │       ├── adapters/
-    │       │   ├── task-mock.adapter.ts    # Modo Demo con AsyncStorage + Delay
+    │       │   ├── task-storage.adapter.ts # Modo Local: AsyncStorage con Seed
     │       │   └── task-http.adapter.ts    # Modo API REST (NestJS ready)
     │       ├── factories/
     │       │   └── task-adapter.factory.ts # Resolución dinámica según Feature Flag
-    │       └── mocks/
-    │           └── task.mock.ts            # Datos semilla iniciales
+    │       └── seeds/
+    │           └── task.seed.ts            # Semillas de datos iniciales
     ├── components/
     │   ├── ui/                       # Componentes Atómicos Reutilizables (Design System)
     │   │   ├── AppCard.tsx

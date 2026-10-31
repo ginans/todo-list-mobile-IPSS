@@ -118,17 +118,17 @@ export const useTasks = () => {
     [repository]
   );
 
-  // Restablecer datos semilla (modo demo)
-  const resetToMockData = useCallback(async (): Promise<boolean> => {
-    if (!repository.resetToMock) return false;
+  // Restablecer datos iniciales al Seed (modo local)
+  const resetToSeedData = useCallback(async (): Promise<boolean> => {
+    if (!repository.resetToSeed) return false;
     setIsLoading(true);
     setError(null);
     try {
-      const resetTasks = await repository.resetToMock();
+      const resetTasks = await repository.resetToSeed();
       setTasks(resetTasks);
       return true;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al restablecer datos demo.';
+      const message = err instanceof Error ? err.message : 'Error al restablecer datos del seed.';
       setError(message);
       return false;
     } finally {
@@ -187,6 +187,7 @@ export const useTasks = () => {
     updateTask,
     deleteTask,
     toggleStatus,
-    resetToMockData,
+    resetToSeedData,
+    resetToMockData: resetToSeedData,
   };
 };

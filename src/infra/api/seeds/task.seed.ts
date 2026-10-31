@@ -3,11 +3,11 @@ import { TaskPriority } from '../../../core/task/enums/task-priority.enum';
 import { TaskStatus } from '../../../core/task/enums/task-status.enum';
 
 /**
- * Tareas iniciales de prueba (Seed Data)
- * Permite que el evaluador observe la app funcionando de inmediato
- * con tareas contextualizadas en la asignatura.
+ * Semillas de Datos Iniciales (Seed Data)
+ * Se utilizan para poblar el almacenamiento local en el primer arranque (Cold Start),
+ * o al solicitar un reseteo a los datos de fábrica de la evaluación.
  */
-export const INITIAL_TASKS_MOCK: ITask[] = [
+export const TASK_SEEDS: ITask[] = [
   {
     id: 'task-1',
     title: 'Configurar entorno de desarrollo',
@@ -45,3 +45,4 @@ export const INITIAL_TASKS_MOCK: ITask[] = [
     updatedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
   },
 ];
+
