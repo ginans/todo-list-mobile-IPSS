@@ -40,14 +40,11 @@ export default function App() {
     updateTask,
     deleteTask,
     toggleStatus,
-    resetToSeedData,
   } = useTasks();
 
   const [isFormModalVisible, setIsFormModalVisible] = useState(false);
   const [editingTask, setEditingTask] = useState<ITask | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<ITask | null>(null);
-  const [isResetConfirmVisible, setIsResetConfirmVisible] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (message: string) => {
@@ -91,16 +88,6 @@ export default function App() {
     setTaskToDelete(null);
   };
 
-  const handleConfirmReset = async () => {
-    setIsResetting(true);
-    const success = await resetToSeedData();
-    setIsResetting(false);
-    setIsResetConfirmVisible(false);
-    if (success) {
-      showToast('⚡ Datos restablecidos a los Seeds iniciales');
-    }
-  };
-
   return (
     <SafeAreaProvider>
       <PaperProvider theme={appTheme}>
@@ -110,11 +97,7 @@ export default function App() {
             style={styles.keyboardContainer}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           >
-            <TaskHeader
-              stats={stats}
-              onResetDemo={() => setIsResetConfirmVisible(true)}
-              isResetting={isResetting}
-            />
+            <TaskHeader stats={stats} />
 
             <TaskFilterTabs
               filter={filter}
@@ -196,17 +179,6 @@ export default function App() {
               onConfirm={handleConfirmDelete}
               onCancel={() => setTaskToDelete(null)}
               loading={isActionLoading}
-            />
-
-            <AppConfirmDialog
-              visible={isResetConfirmVisible}
-              title="¿Restablecer Datos Iniciales?"
-              message="Se recargarán las tareas iniciales del Seed y se descartarán los cambios locales actuales."
-              confirmLabel="Restablecer"
-              cancelLabel="Cancelar"
-              onConfirm={handleConfirmReset}
-              onCancel={() => setIsResetConfirmVisible(false)}
-              loading={isResetting}
             />
 
             <Snackbar

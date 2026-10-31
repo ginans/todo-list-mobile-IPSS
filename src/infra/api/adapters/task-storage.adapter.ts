@@ -5,9 +5,8 @@ import { CreateTaskInput } from '../../../core/task/types/create-task.type';
 import { UpdateTaskInput } from '../../../core/task/types/update-task.type';
 import { TaskPriority } from '../../../core/task/enums/task-priority.enum';
 import { TaskStatus } from '../../../core/task/enums/task-status.enum';
-import { TASK_SEEDS } from '../seeds/task.seed';
 
-const STORAGE_KEY = '@todo_tasks_v1';
+const STORAGE_KEY = '@todo_tasks_v2';
 const SIMULATED_LATENCY_MS = 250;
 
 export class TaskStorageAdapter implements ITaskRepository {
@@ -24,17 +23,12 @@ export class TaskStorageAdapter implements ITaskRepository {
 
     try {
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        this.inMemoryTasks = JSON.parse(stored);
-      } else {
-        this.inMemoryTasks = [...TASK_SEEDS];
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(this.inMemoryTasks));
-      }
+      this.inMemoryTasks = stored ? JSON.parse(stored) : [];
     } catch {
-      this.inMemoryTasks = [...TASK_SEEDS];
+      this.inMemoryTasks = [];
     }
 
-    return this.inMemoryTasks || [...TASK_SEEDS];
+    return this.inMemoryTasks || [];
   }
 
   private async saveToStorage(tasks: ITask[]): Promise<void> {
@@ -114,12 +108,5 @@ export class TaskStorageAdapter implements ITaskRepository {
 
     await this.saveToStorage(filtered);
     return true;
-  }
-
-  async resetToSeed(): Promise<ITask[]> {
-    await this.simulateDelay();
-    const freshSeeds = [...TASK_SEEDS];
-    await this.saveToStorage(freshSeeds);
-    return freshSeeds;
   }
 }

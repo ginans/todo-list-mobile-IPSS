@@ -8,5 +8,4 @@ export interface ITaskRepository {
   create(input: CreateTaskInput): Promise<ITask>;
   update(id: string, input: UpdateTaskInput): Promise<ITask>;
   delete(id: string): Promise<boolean>;
-  resetToSeed?(): Promise<ITask[]>;
 }

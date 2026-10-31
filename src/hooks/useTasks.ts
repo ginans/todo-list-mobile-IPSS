@@ -108,23 +108,6 @@ export const useTasks = () => {
     [repository]
   );
 
-  const resetToSeedData = useCallback(async (): Promise<boolean> => {
-    if (!repository.resetToSeed) return false;
-    setIsLoading(true);
-    setError(null);
-    try {
-      const resetTasks = await repository.resetToSeed();
-      setTasks(resetTasks);
-      return true;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al restablecer datos del seed.';
-      setError(message);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [repository]);
-
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
       const matchesStatus =
@@ -172,6 +155,5 @@ export const useTasks = () => {
     updateTask,
     deleteTask,
     toggleStatus,
-    resetToSeedData,
   };
 };

@@ -58,7 +58,7 @@ flowchart LR
 
     subgraph Infra ["Capa Infraestructura"]
         Factory["TaskAdapterFactory"]
-        Storage["TaskStorageAdapter (AsyncStorage + Seed)"]
+        Storage["TaskStorageAdapter (AsyncStorage)"]
         Http["TaskHttpAdapter (API REST)"]
     end
 
@@ -74,7 +74,7 @@ flowchart LR
 
 ### 1. Patrón Adapter (Adaptador de Infraestructura)
 Desacopla la lógica de acceso a datos de los componentes visuales mediante un contrato común (`ITaskRepository`).
-- **`TaskStorageAdapter`:** Persiste datos reales en el almacenamiento local móvil (`AsyncStorage`) y ejecuta un Seeding automático (`TASK_SEEDS`) en el primer inicio (Cold Start).
+- **`TaskStorageAdapter`:** Persiste datos reales en el almacenamiento local móvil (`AsyncStorage`) en modo demo/local, iniciando con un estado limpio (`[]`) que invita al usuario a registrar su primera tarea.
 - **`TaskHttpAdapter`:** Preconfigurado con llamadas `fetch` estándar hacia una API REST (preparado para NestJS en la Unidad 2).
 
 ```typescript
@@ -85,7 +85,6 @@ export interface ITaskRepository {
   create(input: CreateTaskInput): Promise<ITask>;
   update(id: string, input: UpdateTaskInput): Promise<ITask>;
   delete(id: string): Promise<boolean>;
-  resetToSeed?(): Promise<ITask[]>;
 }
 ```
 
@@ -168,8 +167,8 @@ La aplicación cuenta con una suite completa de componentes interactivos:
    - La barra de progreso superior refleja inmediatamente el porcentaje de cumplimiento de las tareas.
 4. **Soporte Pull-to-Refresh:**
    - La lista de tareas permite deslizar hacia abajo para recargar datos simulando la sincronización en tiempo real.
-5. **Feature Flag con Botón Condicional:**
-   - El botón de *"Restablecer Datos"* solo se renderiza si la aplicación se encuentra en **Modo Demo** (`isDemoMode === true`), evitando que en un entorno de producción con API real exista un botón de reseteo peligroso.
+5. **Estado Vacío Interactivo (Empty State):**
+   - Cuando la lista inicia en 0 tareas, presenta una vista limpia y centrada con un llamado a la acción claro (*"+ Crear Primera Tarea"*), evitando abrumar la pantalla con banners técnicos.
 
 ---
 
@@ -221,12 +220,10 @@ todo-list-mobile-ipss/
     ├── infra/                        # Capa de Infraestructura y Datos
     │   └── api/
     │       ├── adapters/
-    │       │   ├── task-storage.adapter.ts # Modo Demo: AsyncStorage con Seed
+    │       │   ├── task-storage.adapter.ts # Modo Demo: Persistencia en AsyncStorage
     │       │   └── task-http.adapter.ts    # Modo API REST (NestJS ready)
-    │       ├── factories/
-    │       │   └── task-adapter.factory.ts # Resolución dinámica según Feature Flag
-    │       └── seeds/
-    │           └── task.seed.ts            # Semillas de datos iniciales
+    │       └── factories/
+    │           └── task-adapter.factory.ts # Resolución dinámica según Feature Flag
     ├── components/
     │   ├── ui/                       # Componentes Atómicos Reutilizables (Design System)
     │   │   ├── AppCard.tsx

@@ -2,8 +2,6 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { ProgressBar } from 'react-native-paper';
 import { appTheme, semanticColors } from '../../theme/app-theme';
-import { envConfig } from '../../config/env.config';
-import { AppButton } from '../ui/AppButton';
 
 interface TaskHeaderProps {
   stats: {
@@ -13,58 +11,11 @@ interface TaskHeaderProps {
     progress: number;
     progressPercentage: number;
   };
-  onResetDemo: () => void;
-  isResetting?: boolean;
 }
 
-export const TaskHeader: React.FC<TaskHeaderProps> = ({
-  stats,
-  onResetDemo,
-  isResetting = false,
-}) => {
+export const TaskHeader: React.FC<TaskHeaderProps> = ({ stats }) => {
   return (
     <View style={styles.container}>
-      {envConfig.isDemoMode && (
-      <View
-        style={[
-          styles.demoBanner,
-          {
-            backgroundColor: envConfig.isDemoMode
-              ? semanticColors.infoLight
-              : semanticColors.successLight,
-          },
-        ]}
-      >
-        <View style={styles.demoBannerContent}>
-          <Text
-            style={[
-              styles.demoBannerText,
-              {
-                color: envConfig.isDemoMode
-                  ? semanticColors.info
-                  : semanticColors.success,
-              },
-            ]}
-          >
-            
-              'Modo Demo'
-           
-          </Text>
-            <AppButton
-            label="Restablecer Seed"
-            onPress={onResetDemo}
-            variant="outline"
-            compact
-            loading={isResetting}
-            style={styles.resetButton}
-            />
-          
-        </View>
-      </View>
-      )}
-    
-    
-
       <View style={styles.titleRow}>
         <View>
           <Text style={styles.title}>Mis Tareas</Text>
@@ -109,31 +60,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 8,
-  },
-  demoBanner: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
-    marginBottom: 14,
-  },
-  demoBannerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  demoBannerText: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.2,
-    flex: 1,
-  },
-  resetButton: {
-    marginVertical: 0,
-    backgroundColor: '#FFFFFF',
-    borderColor: semanticColors.info,
-    borderWidth: 1,
   },
   titleRow: {
     flexDirection: 'row',
