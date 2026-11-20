@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ViewStyle, StyleProp } from 'react-native';
+import { KeyboardTypeOptions, View, ViewStyle, StyleProp } from 'react-native';
 import { TextInput, HelperText } from 'react-native-paper';
 import { appTheme, semanticColors } from '../../theme/app-theme';
 import { styles } from './styles/app-input.styles';
@@ -15,6 +15,8 @@ interface AppInputProps {
   numberOfLines?: number;
   maxLength?: number;
   disabled?: boolean;
+  keyboardType?: KeyboardTypeOptions;
+  secureTextEntry?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -29,6 +31,8 @@ export const AppInput: React.FC<AppInputProps> = ({
   numberOfLines = 1,
   maxLength,
   disabled = false,
+  keyboardType,
+  secureTextEntry = false,
   style,
 }) => {
   const hasError = Boolean(error);
@@ -46,6 +50,8 @@ export const AppInput: React.FC<AppInputProps> = ({
         numberOfLines={numberOfLines}
         maxLength={maxLength}
         disabled={disabled}
+        keyboardType={keyboardType}
+        secureTextEntry={secureTextEntry}
         outlineColor={semanticColors.border}
         activeOutlineColor={appTheme.colors.primary}
         style={styles.input}

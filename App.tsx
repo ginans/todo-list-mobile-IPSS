@@ -12,11 +12,13 @@ import { PaperProvider, FAB, Snackbar, ActivityIndicator } from 'react-native-pa
 import { StatusBar } from 'expo-status-bar';
 
 import { appTheme } from './src/theme/app-theme';
+import { useAuthProfiles } from './src/hooks/useAuthProfiles';
 import { useTasks } from './src/hooks/useTasks';
 import { ITask } from './src/core/task/interfaces/task.interface';
 import { CreateTaskInput } from './src/core/task/types/create-task.type';
 import { UpdateTaskInput } from './src/core/task/types/update-task.type';
 
+import { ProfileAuthScreen } from './src/components/auth/ProfileAuthScreen';
 import { TaskHeader } from './src/components/tasks/TaskHeader';
 import { TaskFilterTabs } from './src/components/tasks/TaskFilterTabs';
 import { TaskItem } from './src/components/tasks/TaskItem';
@@ -28,6 +30,19 @@ import { styles } from './src/styles/app.styles';
 const paperTexture = require('./assets/paper-texture.png');
 
 export default function App() {
+  const {
+    profiles,
+    activeProfile,
+    isAuthLoading,
+    authError,
+    biometricCapability,
+    createProfile,
+    unlockWithPin,
+    unlockWithBiometrics,
+    logout,
+    clearAuthError,
+  } = useAuthProfiles();
+
   const {
     tasks,
     allTasksCount,
@@ -43,7 +58,7 @@ export default function App() {
     updateTask,
     deleteTask,
     toggleStatus,
-  } = useTasks();
+  } = useTasks(activeProfile?.id);
 
   const [isFormModalVisible, setIsFormModalVisible] = useState(false);
   const [editingTask, setEditingTask] = useState<ITask | null>(null);
@@ -105,98 +120,120 @@ export default function App() {
               style={styles.keyboardContainer}
               behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
-              <TaskHeader stats={stats} />
-
-              <TaskFilterTabs
-                filter={filter}
-                onFilterChange={setFilter}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                counts={{
-                  all: allTasksCount,
-                  pending: stats.pending,
-                  completed: stats.completed,
-                }}
-              />
-
-              {isLoading && tasks.length === 0 ? (
+              {isAuthLoading ? (
                 <View style={styles.loadingContainer}>
                   <ActivityIndicator size="large" color={appTheme.colors.primary} />
                 </View>
+              ) : !activeProfile ? (
+                <ProfileAuthScreen
+                  profiles={profiles}
+                  biometricCapability={biometricCapability}
+                  authError={authError}
+                  onCreateProfile={createProfile}
+                  onUnlockWithPin={unlockWithPin}
+                  onUnlockWithBiometrics={unlockWithBiometrics}
+                  onClearError={clearAuthError}
+                />
               ) : (
-                <FlatList
-                  data={tasks}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => (
-                    <TaskItem
-                      task={item}
-                      onToggleStatus={toggleStatus}
-                      onEdit={handleOpenEdit}
-                      onDelete={setTaskToDelete}
+                <>
+                  <TaskHeader
+                    profileName={activeProfile.name}
+                    onLogout={logout}
+                    stats={stats}
+                  />
+
+                  <TaskFilterTabs
+                    filter={filter}
+                    onFilterChange={setFilter}
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    counts={{
+                      all: allTasksCount,
+                      pending: stats.pending,
+                      completed: stats.completed,
+                    }}
+                  />
+
+                  {isLoading && tasks.length === 0 ? (
+                    <View style={styles.loadingContainer}>
+                      <ActivityIndicator size="large" color={appTheme.colors.primary} />
+                    </View>
+                  ) : (
+                    <FlatList
+                      data={tasks}
+                      keyExtractor={(item) => item.id}
+                      renderItem={({ item }) => (
+                        <TaskItem
+                          task={item}
+                          onToggleStatus={toggleStatus}
+                          onEdit={handleOpenEdit}
+                          onDelete={setTaskToDelete}
+                        />
+                      )}
+                      contentContainerStyle={styles.listContent}
+                      refreshControl={
+                        <RefreshControl
+                          refreshing={isLoading}
+                          onRefresh={loadTasks}
+                          colors={[appTheme.colors.primary]}
+                          tintColor={appTheme.colors.primary}
+                        />
+                      }
+                      ListEmptyComponent={
+                        <TaskEmptyState
+                          hasFilters={filter !== 'ALL' || Boolean(searchQuery)}
+                          onClearFilters={() => {
+                            setFilter('ALL');
+                            setSearchQuery('');
+                          }}
+                          onAddTask={handleOpenCreate}
+                        />
+                      }
                     />
                   )}
-                  contentContainerStyle={styles.listContent}
-                  refreshControl={
-                    <RefreshControl
-                      refreshing={isLoading}
-                      onRefresh={loadTasks}
-                      colors={[appTheme.colors.primary]}
-                      tintColor={appTheme.colors.primary}
-                    />
-                  }
-                  ListEmptyComponent={
-                    <TaskEmptyState
-                      hasFilters={filter !== 'ALL' || Boolean(searchQuery)}
-                      onClearFilters={() => {
-                        setFilter('ALL');
-                        setSearchQuery('');
-                      }}
-                      onAddTask={handleOpenCreate}
-                    />
-                  }
-                />
+
+                  <FAB
+                    icon="plus"
+                    label="Nueva Tarea"
+                    onPress={handleOpenCreate}
+                    style={styles.fab}
+                    color="#FFFDF8"
+                  />
+
+                  <TaskFormModal
+                    visible={isFormModalVisible}
+                    onDismiss={() => setIsFormModalVisible(false)}
+                    onSubmit={handleFormSubmit}
+                    initialTask={editingTask}
+                    loading={isActionLoading}
+                  />
+
+                  <AppConfirmDialog
+                    visible={Boolean(taskToDelete)}
+                    title="¿Eliminar esta tarea?"
+                    message={
+                      taskToDelete
+                        ? `Se eliminará permanentemente la tarea "${taskToDelete.title}". Esta acción no se puede deshacer.`
+                        : ''
+                    }
+                    confirmLabel="Eliminar"
+                    cancelLabel="Cancelar"
+                    isDestructive
+                    onConfirm={handleConfirmDelete}
+                    onCancel={() => setTaskToDelete(null)}
+                    loading={isActionLoading}
+                  />
+
+                  <Snackbar
+                    visible={Boolean(toastMessage)}
+                    onDismiss={() => setToastMessage(null)}
+                    duration={2600}
+                    style={styles.snackbar}
+                  >
+                    {toastMessage}
+                  </Snackbar>
+                </>
               )}
-
-              <FAB
-                icon="plus"
-                label="Nueva Tarea"
-                onPress={handleOpenCreate}
-                style={styles.fab}
-                color="#FFFDF8"
-              />
-
-              <TaskFormModal
-                visible={isFormModalVisible}
-                onDismiss={() => setIsFormModalVisible(false)}
-                onSubmit={handleFormSubmit}
-                initialTask={editingTask}
-                loading={isActionLoading}
-              />
-
-              <AppConfirmDialog
-                visible={Boolean(taskToDelete)}
-                title="¿Eliminar esta tarea?"
-                message={
-                  taskToDelete
-                    ? `Se eliminará permanentemente la tarea "${taskToDelete.title}". Esta acción no se puede deshacer.`
-                    : ''
-                }
-                confirmLabel="Eliminar"
-                cancelLabel="Cancelar"
-                isDestructive
-                onConfirm={handleConfirmDelete}
-                onCancel={() => setTaskToDelete(null)}
-                loading={isActionLoading}
-              />
-
-              <Snackbar
-                visible={Boolean(toastMessage)}
-                onDismiss={() => setToastMessage(null)}
-                duration={2600}
-                style={styles.snackbar}
-              >
-                {toastMessage}
-              </Snackbar>
             </KeyboardAvoidingView>
           </SafeAreaView>
         </ImageBackground>
