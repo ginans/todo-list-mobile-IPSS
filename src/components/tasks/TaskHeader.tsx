@@ -6,7 +6,7 @@ import { styles } from './styles/task-header.styles';
 
 interface TaskHeaderProps {
   profileName?: string;
-  onOpenDiagnostics?: () => void;
+  onOpenProfile?: () => void;
   onLogout?: () => void;
   stats: {
     total: number;
@@ -19,7 +19,7 @@ interface TaskHeaderProps {
 
 export const TaskHeader: React.FC<TaskHeaderProps> = ({
   profileName,
-  onOpenDiagnostics,
+  onOpenProfile,
   onLogout,
   stats,
 }) => {
@@ -33,19 +33,19 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
           </Text>
         </View>
 
-        {(onOpenDiagnostics || onLogout) && (
+        {(onOpenProfile || onLogout) && (
           <View style={styles.headerActions}>
-            {onOpenDiagnostics && (
+            {onOpenProfile && (
               <Pressable
-                onPress={onOpenDiagnostics}
+                onPress={onOpenProfile}
                 style={styles.headerIconBtn}
                 accessibilityRole="button"
-                accessibilityLabel="Diagnóstico de periféricos"
+                accessibilityLabel="Administrar perfil"
               >
                 <MaterialCommunityIcons
-                  name="shield-check-outline"
-                  size={20}
-                  color={semanticColors.success}
+                  name="account-circle-outline"
+                  size={21}
+                  color={paperPalette.accentPrimary}
                 />
               </Pressable>
             )}
@@ -54,12 +54,12 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
                 onPress={onLogout}
                 style={styles.headerIconBtn}
                 accessibilityRole="button"
-                accessibilityLabel="Cambiar perfil"
+                accessibilityLabel="Cerrar sesión"
               >
                 <MaterialCommunityIcons
-                  name="account-switch-outline"
+                  name="logout"
                   size={20}
-                  color={paperPalette.accentPrimary}
+                  color={semanticColors.danger}
                 />
               </Pressable>
             )}

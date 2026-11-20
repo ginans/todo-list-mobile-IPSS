@@ -27,7 +27,7 @@ import { CreateTaskInput } from './src/core/task/types/create-task.type';
 import { UpdateTaskInput } from './src/core/task/types/update-task.type';
 
 import { ProfileAuthScreen } from './src/components/auth/ProfileAuthScreen';
-import { PeripheralsDiagnosticModal } from './src/components/device/PeripheralsDiagnosticModal';
+import { ProfileSettingsModal } from './src/components/auth/ProfileSettingsModal';
 import { TaskHeader } from './src/components/tasks/TaskHeader';
 import { TaskFilterTabs } from './src/components/tasks/TaskFilterTabs';
 import { TaskItem } from './src/components/tasks/TaskItem';
@@ -44,16 +44,14 @@ export default function App() {
     profiles,
     activeProfile,
     lastProfileId,
-    isSwitchingProfile,
     isAuthLoading,
     authError,
     biometricCapability,
     createProfile,
     unlockWithPin,
     unlockWithBiometrics,
-    openProfileSwitcher,
-    cancelProfileSwitch,
     deleteProfile,
+    logout,
     clearAuthError,
   } = useAuthProfiles();
 
@@ -75,7 +73,7 @@ export default function App() {
   } = useTasks(activeProfile?.id);
 
   const [isFormModalVisible, setIsFormModalVisible] = useState(false);
-  const [isDiagnosticsVisible, setIsDiagnosticsVisible] = useState(false);
+  const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
   const [previewPhotoUri, setPreviewPhotoUri] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<ITask | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<ITask | null>(null);
@@ -140,12 +138,10 @@ export default function App() {
                 <View style={styles.loadingContainer}>
                   <ActivityIndicator size="large" color={appTheme.colors.primary} />
                 </View>
-              ) : !activeProfile || isSwitchingProfile ? (
+              ) : !activeProfile ? (
                 <ProfileAuthScreen
                   profiles={profiles}
                   defaultProfileId={lastProfileId}
-                  canGoBack={Boolean(activeProfile && isSwitchingProfile)}
-                  onGoBack={cancelProfileSwitch}
                   biometricCapability={biometricCapability}
                   authError={authError}
                   onCreateProfile={createProfile}
@@ -157,8 +153,8 @@ export default function App() {
                 <>
                   <TaskHeader
                     profileName={activeProfile.name}
-                    onOpenDiagnostics={() => setIsDiagnosticsVisible(true)}
-                    onLogout={openProfileSwitcher}
+                    onOpenProfile={() => setIsProfileModalVisible(true)}
+                    onLogout={logout}
                     stats={stats}
                   />
 
@@ -245,11 +241,11 @@ export default function App() {
                     loading={isActionLoading}
                   />
 
-                  <PeripheralsDiagnosticModal
-                    visible={isDiagnosticsVisible}
-                    onDismiss={() => setIsDiagnosticsVisible(false)}
-                    profileName={activeProfile.name}
-                    onDeleteCurrentProfile={async () => {
+                  <ProfileSettingsModal
+                    visible={isProfileModalVisible}
+                    onDismiss={() => setIsProfileModalVisible(false)}
+                    profile={activeProfile}
+                    onDeleteProfile={async () => {
                       await deleteProfile(activeProfile.id);
                     }}
                     storageStats={{
