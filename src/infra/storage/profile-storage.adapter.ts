@@ -5,6 +5,8 @@ import { APP_MESSAGES } from '../../constants/messages.constants';
 
 const PROFILES_STORAGE_KEY = '@todo_profiles_v1';
 const ACTIVE_PROFILE_KEY = '@todo_active_profile_v1';
+const LAST_PROFILE_KEY = '@todo_last_profile_v1';
+const TASKS_STORAGE_PREFIX = '@todo_tasks_v2';
 
 const AVATAR_PALETTE = [
   '#8C583A',
@@ -30,7 +32,28 @@ export class ProfileStorageAdapter {
   async getProfiles(): Promise<IUserProfile[]> {
     try {
       const stored = await AsyncStorage.getItem(PROFILES_STORAGE_KEY);
-      return stored ? (JSON.parse(stored) as IUserProfile[]) : [];
+      if (!stored) return [];
+      const parsed = JSON.parse(stored) as IUserProfile[];
+
+      let foundBiometricOwner = false;
+      let needsSave = false;
+      const normalized = parsed.map((profile) => {
+        if (profile.biometricEnabled) {
+          if (!foundBiometricOwner) {
+            foundBiometricOwner = true;
+            return profile;
+          }
+          needsSave = true;
+          return { ...profile, biometricEnabled: false };
+        }
+        return profile;
+      });
+
+      if (needsSave) {
+        await this.saveProfiles(normalized);
+      }
+
+      return normalized;
     } catch {
       return [];
     }
@@ -58,13 +81,14 @@ export class ProfileStorageAdapter {
       throw new Error(APP_MESSAGES.AUTH.PROFILE_DUPLICATE);
     }
 
+    const hasBiometricOwner = profiles.some((profile) => profile.biometricEnabled);
     const id = `profile-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const newProfile: IUserProfile = {
       id,
       name: cleanName,
       avatarColor: AVATAR_PALETTE[profiles.length % AVATAR_PALETTE.length],
       pinHash: hashPin(input.pin, id),
-      biometricEnabled: Boolean(input.biometricEnabled),
+      biometricEnabled: Boolean(input.biometricEnabled) && !hasBiometricOwner,
       createdAt: new Date().toISOString(),
     };
 
@@ -113,12 +137,51 @@ export class ProfileStorageAdapter {
     }
   }
 
+  async getLastProfileId(): Promise<string | null> {
+    try {
+      return await AsyncStorage.getItem(LAST_PROFILE_KEY);
+    } catch {
+      return null;
+    }
+  }
+
   async setActiveProfileId(profileId: string | null): Promise<void> {
     if (!profileId) {
       await AsyncStorage.removeItem(ACTIVE_PROFILE_KEY);
       return;
     }
     await AsyncStorage.setItem(ACTIVE_PROFILE_KEY, profileId);
+    await AsyncStorage.setItem(LAST_PROFILE_KEY, profileId);
+  }
+
+  async deleteProfile(profileId: string): Promise<boolean> {
+    const profiles = await this.getProfiles();
+    const filtered = profiles.filter((item) => item.id !== profileId);
+    if (filtered.length === profiles.length) {
+      return false;
+    }
+
+    await this.saveProfiles(filtered);
+    await AsyncStorage.removeItem(`${TASKS_STORAGE_PREFIX}_${profileId}`);
+
+    const [activeId, lastId] = await Promise.all([
+      this.getActiveProfileId(),
+      this.getLastProfileId(),
+    ]);
+
+    if (activeId === profileId) {
+      await AsyncStorage.removeItem(ACTIVE_PROFILE_KEY);
+    }
+    if (lastId === profileId) {
+      const fallbackId = filtered[0]?.id;
+      if (fallbackId) {
+        await AsyncStorage.setItem(LAST_PROFILE_KEY, fallbackId);
+      } else {
+        await AsyncStorage.removeItem(LAST_PROFILE_KEY);
+      }
+    }
+
+    return true;
   }
 }
 

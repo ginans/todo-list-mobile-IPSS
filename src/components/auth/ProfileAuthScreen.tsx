@@ -7,11 +7,15 @@ import { CreateProfileInput } from '../../core/auth/types/create-profile.type';
 import { IBiometricCapability } from '../../core/device/interfaces/peripheral-result.interface';
 import { AppInput } from '../ui/AppInput';
 import { AppButton } from '../ui/AppButton';
+import { APP_MESSAGES } from '../../constants/messages.constants';
 import { paperPalette, semanticColors } from '../../theme/app-theme';
 import { styles } from './styles/profile-auth.styles';
 
 interface ProfileAuthScreenProps {
   profiles: IUserProfile[];
+  defaultProfileId?: string | null;
+  canGoBack?: boolean;
+  onGoBack?: () => void;
   biometricCapability: IBiometricCapability;
   authError: string | null;
   onCreateProfile: (input: CreateProfileInput) => Promise<boolean>;
@@ -22,6 +26,9 @@ interface ProfileAuthScreenProps {
 
 export const ProfileAuthScreen: React.FC<ProfileAuthScreenProps> = ({
   profiles,
+  defaultProfileId,
+  canGoBack = false,
+  onGoBack,
   biometricCapability,
   authError,
   onCreateProfile,
@@ -30,8 +37,9 @@ export const ProfileAuthScreen: React.FC<ProfileAuthScreenProps> = ({
   onClearError,
 }) => {
   const [isCreating, setIsCreating] = useState(profiles.length === 0);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(
-    profiles[0]?.id ?? null
+    defaultProfileId ?? profiles[0]?.id ?? null
   );
 
   const [newName, setNewName] = useState('');
@@ -44,14 +52,25 @@ export const ProfileAuthScreen: React.FC<ProfileAuthScreenProps> = ({
     if (profiles.length === 0) {
       setIsCreating(true);
       setSelectedProfileId(null);
-    } else if (!selectedProfileId) {
-      setSelectedProfileId(profiles[0].id);
+      return;
     }
-  }, [profiles, selectedProfileId]);
+
+    const preferredId =
+      defaultProfileId && profiles.some((p) => p.id === defaultProfileId)
+        ? defaultProfileId
+        : profiles[0].id;
+
+    setSelectedProfileId((prev) =>
+      prev && profiles.some((p) => p.id === prev) ? prev : preferredId
+    );
+  }, [profiles, defaultProfileId]);
+
+  const biometricOwner = profiles.find((item) => item.biometricEnabled) ?? null;
+  const canAssignBiometric = biometricCapability.available && !biometricOwner;
 
   useEffect(() => {
-    setEnableBiometric(biometricCapability.available);
-  }, [biometricCapability.available]);
+    setEnableBiometric(canAssignBiometric);
+  }, [canAssignBiometric]);
 
   const selectedProfile =
     profiles.find((item) => item.id === selectedProfileId) ?? profiles[0] ?? null;
@@ -63,7 +82,7 @@ export const ProfileAuthScreen: React.FC<ProfileAuthScreenProps> = ({
     const ok = await onCreateProfile({
       name: newName,
       pin: newPin,
-      biometricEnabled: biometricCapability.available && enableBiometric,
+      biometricEnabled: canAssignBiometric && enableBiometric,
     });
     setIsSubmitting(false);
     if (ok) {
@@ -92,6 +111,7 @@ export const ProfileAuthScreen: React.FC<ProfileAuthScreenProps> = ({
 
   const switchMode = (createMode: boolean) => {
     onClearError();
+    setIsDropdownOpen(false);
     setUnlockPin('');
     setNewName('');
     setNewPin('');
@@ -105,6 +125,22 @@ export const ProfileAuthScreen: React.FC<ProfileAuthScreenProps> = ({
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.card}>
+        {canGoBack && onGoBack && (
+          <Pressable
+            onPress={onGoBack}
+            style={styles.backRow}
+            accessibilityRole="button"
+            accessibilityLabel="Volver a mi cuaderno"
+          >
+            <MaterialCommunityIcons
+              name="arrow-left"
+              size={18}
+              color={paperPalette.accentPrimary}
+            />
+            <Text style={styles.backText}>Volver a mi cuaderno</Text>
+          </Pressable>
+        )}
+
         <View style={styles.brandHeader}>
           <View style={styles.brandIconBox}>
             <MaterialCommunityIcons
@@ -162,14 +198,14 @@ export const ProfileAuthScreen: React.FC<ProfileAuthScreenProps> = ({
               disabled={isSubmitting}
             />
 
-            {biometricCapability.available && (
+            {canAssignBiometric ? (
               <View style={styles.biometricSwitchRow}>
                 <View style={styles.biometricSwitchText}>
                   <Text style={styles.biometricSwitchTitle}>
                     Desbloqueo con {biometricCapability.label}
                   </Text>
                   <Text style={styles.biometricSwitchSubtitle}>
-                    Permite abrir este perfil sin escribir el PIN.
+                    Vincula tu huella digital a este perfil principal.
                   </Text>
                 </View>
                 <Switch
@@ -179,7 +215,18 @@ export const ProfileAuthScreen: React.FC<ProfileAuthScreenProps> = ({
                   disabled={isSubmitting}
                 />
               </View>
-            )}
+            ) : biometricCapability.available && biometricOwner ? (
+              <View style={styles.biometricSwitchRow}>
+                <View style={styles.biometricSwitchText}>
+                  <Text style={styles.biometricSwitchTitle}>
+                    Huella digital exclusiva
+                  </Text>
+                  <Text style={styles.biometricSwitchSubtitle}>
+                    {APP_MESSAGES.AUTH.BIOMETRIC_OWNER_TAKEN(biometricOwner.name)}
+                  </Text>
+                </View>
+              </View>
+            ) : null}
 
             <View style={styles.primaryActions}>
               <AppButton
@@ -205,55 +252,96 @@ export const ProfileAuthScreen: React.FC<ProfileAuthScreenProps> = ({
           </View>
         ) : (
           <View>
-            <Text style={styles.sectionLabel}>Perfiles guardados</Text>
+            <Text style={styles.sectionLabel}>Perfil seleccionado</Text>
 
-            <View style={styles.profilesList}>
-              {profiles.map((profile) => {
-                const isSelected = selectedProfile?.id === profile.id;
-                return (
-                  <Pressable
-                    key={profile.id}
-                    onPress={() => {
-                      setSelectedProfileId(profile.id);
-                      setUnlockPin('');
-                      onClearError();
-                    }}
+            {selectedProfile && (
+              <View style={styles.dropdownWrapper}>
+                <Pressable
+                  onPress={() => {
+                    if (profiles.length > 1) {
+                      setIsDropdownOpen((prev) => !prev);
+                    }
+                  }}
+                  style={styles.dropdownTrigger}
+                  accessibilityRole="button"
+                  accessibilityLabel="Seleccionar perfil"
+                >
+                  <View
                     style={[
-                      styles.profileItem,
-                      isSelected && styles.profileItemSelected,
+                      styles.avatarCircle,
+                      { backgroundColor: selectedProfile.avatarColor },
                     ]}
                   >
-                    <View
-                      style={[
-                        styles.avatarCircle,
-                        { backgroundColor: profile.avatarColor },
-                      ]}
-                    >
-                      <Text style={styles.avatarInitial}>
-                        {profile.name.charAt(0).toUpperCase()}
-                      </Text>
-                    </View>
+                    <Text style={styles.avatarInitial}>
+                      {selectedProfile.name.charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
 
-                    <View style={styles.profileInfo}>
-                      <Text style={styles.profileName}>{profile.name}</Text>
-                      <Text style={styles.profileHint}>
-                        {profile.biometricEnabled && biometricCapability.available
-                          ? `PIN o ${biometricCapability.label}`
-                          : 'Protegido con PIN de 4 dígitos'}
-                      </Text>
-                    </View>
+                  <View style={styles.profileInfo}>
+                    <Text style={styles.profileName}>{selectedProfile.name}</Text>
+                    <Text style={styles.profileHint}>
+                      {selectedProfile.biometricEnabled && biometricCapability.available
+                        ? `PIN o ${biometricCapability.label}`
+                        : 'Protegido con PIN de 4 dígitos'}
+                    </Text>
+                  </View>
 
-                    {isSelected && (
-                      <MaterialCommunityIcons
-                        name="check-circle"
-                        size={20}
-                        color={paperPalette.accentPrimary}
-                      />
-                    )}
-                  </Pressable>
-                );
-              })}
-            </View>
+                  {profiles.length > 1 && (
+                    <MaterialCommunityIcons
+                      name={isDropdownOpen ? 'chevron-up' : 'chevron-down'}
+                      size={22}
+                      color={paperPalette.accentPrimary}
+                    />
+                  )}
+                </Pressable>
+
+                {isDropdownOpen && profiles.length > 1 && (
+                  <View style={styles.dropdownMenu}>
+                    {profiles.map((profile) => {
+                      const isSelected = profile.id === selectedProfile.id;
+                      return (
+                        <Pressable
+                          key={profile.id}
+                          onPress={() => {
+                            setSelectedProfileId(profile.id);
+                            setIsDropdownOpen(false);
+                            setUnlockPin('');
+                            onClearError();
+                          }}
+                          style={[
+                            styles.dropdownOption,
+                            isSelected && styles.dropdownOptionSelected,
+                          ]}
+                        >
+                          <View
+                            style={[
+                              styles.avatarCircle,
+                              { backgroundColor: profile.avatarColor },
+                            ]}
+                          >
+                            <Text style={styles.avatarInitial}>
+                              {profile.name.charAt(0).toUpperCase()}
+                            </Text>
+                          </View>
+
+                          <View style={styles.profileInfo}>
+                            <Text style={styles.profileName}>{profile.name}</Text>
+                          </View>
+
+                          {isSelected && (
+                            <MaterialCommunityIcons
+                              name="check"
+                              size={18}
+                              color={paperPalette.accentPrimary}
+                            />
+                          )}
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                )}
+              </View>
+            )}
 
             {selectedProfile && (
               <View style={styles.unlockBox}>

@@ -7,16 +7,17 @@ export class TaskAdapterFactory {
   private static instances = new Map<string, ITaskRepository>();
 
   public static getRepository(userId?: string): ITaskRepository {
-    const cacheKey = `${envConfig.isDemoMode ? 'local' : 'http'}:${userId ?? 'default'}`;
+    const cacheKey = `${envConfig.dataSource}:${userId ?? 'default'}`;
 
     const existing = TaskAdapterFactory.instances.get(cacheKey);
     if (existing) {
       return existing;
     }
 
-    const instance: ITaskRepository = envConfig.isDemoMode
-      ? new TaskStorageAdapter(userId)
-      : new TaskHttpAdapter(envConfig.apiUrl);
+    const instance: ITaskRepository =
+      envConfig.dataSource === 'local'
+        ? new TaskStorageAdapter(userId)
+        : new TaskHttpAdapter(envConfig.apiUrl);
 
     TaskAdapterFactory.instances.set(cacheKey, instance);
     return instance;

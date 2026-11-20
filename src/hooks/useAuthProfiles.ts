@@ -12,6 +12,8 @@ import { APP_MESSAGES } from '../constants/messages.constants';
 export const useAuthProfiles = () => {
   const [profiles, setProfiles] = useState<IUserProfile[]>([]);
   const [activeProfile, setActiveProfile] = useState<IUserProfile | null>(null);
+  const [lastProfileId, setLastProfileId] = useState<string | null>(null);
+  const [isSwitchingProfile, setIsSwitchingProfile] = useState<boolean>(false);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
   const [authError, setAuthError] = useState<string | null>(null);
   const [biometricCapability, setBiometricCapability] = useState<IBiometricCapability>({
@@ -24,14 +26,16 @@ export const useAuthProfiles = () => {
   const initializeAuth = useCallback(async () => {
     setIsAuthLoading(true);
     try {
-      const [storedProfiles, capability, savedActiveId] = await Promise.all([
+      const [storedProfiles, capability, savedActiveId, savedLastId] = await Promise.all([
         profileStorage.getProfiles(),
         getBiometricCapability(),
         profileStorage.getActiveProfileId(),
+        profileStorage.getLastProfileId(),
       ]);
 
       setProfiles(storedProfiles);
       setBiometricCapability(capability);
+      setLastProfileId(savedLastId ?? savedActiveId ?? storedProfiles[0]?.id ?? null);
 
       if (savedActiveId) {
         const found = storedProfiles.find((p) => p.id === savedActiveId) || null;
@@ -53,6 +57,8 @@ export const useAuthProfiles = () => {
       await profileStorage.setActiveProfileId(created.id);
       setProfiles((prev) => [...prev, created]);
       setActiveProfile(created);
+      setLastProfileId(created.id);
+      setIsSwitchingProfile(false);
       return true;
     } catch (err) {
       setAuthError(err instanceof Error ? err.message : APP_MESSAGES.AUTH.PIN_INVALID_FORMAT);
@@ -76,6 +82,8 @@ export const useAuthProfiles = () => {
 
       await profileStorage.setActiveProfileId(target.id);
       setActiveProfile(target);
+      setLastProfileId(target.id);
+      setIsSwitchingProfile(false);
       return true;
     },
     [profiles]
@@ -96,12 +104,47 @@ export const useAuthProfiles = () => {
 
     await profileStorage.setActiveProfileId(profile.id);
     setActiveProfile(profile);
+    setLastProfileId(profile.id);
+    setIsSwitchingProfile(false);
     return true;
   }, []);
+
+  const openProfileSwitcher = useCallback(() => {
+    setAuthError(null);
+    setIsSwitchingProfile(true);
+  }, []);
+
+  const cancelProfileSwitch = useCallback(() => {
+    setAuthError(null);
+    setIsSwitchingProfile(false);
+  }, []);
+
+  const deleteProfile = useCallback(
+    async (profileId: string): Promise<boolean> => {
+      setAuthError(null);
+      const deleted = await profileStorage.deleteProfile(profileId);
+      if (!deleted) return false;
+
+      const remaining = profiles.filter((p) => p.id !== profileId);
+      setProfiles(remaining);
+
+      if (activeProfile?.id === profileId) {
+        setActiveProfile(null);
+        setIsSwitchingProfile(false);
+      }
+      if (lastProfileId === profileId) {
+        setLastProfileId(remaining[0]?.id ?? null);
+      }
+
+      return true;
+    },
+    [profiles, activeProfile, lastProfileId]
+  );
 
   const logout = useCallback(async () => {
     await profileStorage.setActiveProfileId(null);
     setActiveProfile(null);
+    setIsSwitchingProfile(false);
     setAuthError(null);
   }, []);
 
@@ -112,12 +155,17 @@ export const useAuthProfiles = () => {
   return {
     profiles,
     activeProfile,
+    lastProfileId,
+    isSwitchingProfile,
     isAuthLoading,
     authError,
     biometricCapability,
     createProfile,
     unlockWithPin,
     unlockWithBiometrics,
+    openProfileSwitcher,
+    cancelProfileSwitch,
+    deleteProfile,
     logout,
     clearAuthError,
   };

@@ -19,23 +19,21 @@ export const getBiometricCapability = async (): Promise<IBiometricCapability> =>
 
   try {
     const hasHardware = await LocalAuthentication.hasHardwareAsync();
-    const isEnrolled = hasHardware ? await LocalAuthentication.isEnrolledAsync() : false;
     const types = hasHardware
       ? await LocalAuthentication.supportedAuthenticationTypesAsync()
       : [];
-
-    let label = 'Biometría';
-    if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
-      label = Platform.OS === 'ios' ? 'Face ID' : 'Reconocimiento Facial';
-    } else if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
-      label = Platform.OS === 'ios' ? 'Touch ID' : 'Huella Digital';
-    }
+    const hasFingerprint = types.includes(
+      LocalAuthentication.AuthenticationType.FINGERPRINT
+    );
+    const isEnrolled = hasFingerprint
+      ? await LocalAuthentication.isEnrolledAsync()
+      : false;
 
     return {
-      available: hasHardware && isEnrolled,
-      hasHardware,
+      available: hasFingerprint && isEnrolled,
+      hasHardware: hasFingerprint,
       isEnrolled,
-      label,
+      label: hasFingerprint ? 'Huella Digital' : APP_MESSAGES.AUTH.BIOMETRIC_UNAVAILABLE,
     };
   } catch {
     return {

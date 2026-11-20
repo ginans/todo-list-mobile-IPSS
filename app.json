@@ -13,8 +13,7 @@
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "Necesitamos acceso a la cámara para capturar fotos y adjuntarlas a tus tareas.",
         "NSPhotoLibraryUsageDescription": "Necesitamos acceso a tu galería para adjuntar imágenes existentes a tus tareas.",
-        "NSLocationWhenInUseUsageDescription": "Necesitamos acceso a tu ubicación GPS para registrar dónde creas cada tarea cuando lo solicites.",
-        "NSFaceIDUsageDescription": "Usa Face ID o tu sensor biométrico para desbloquear tu perfil de cuaderno de forma rápida y segura."
+        "NSLocationWhenInUseUsageDescription": "Necesitamos acceso a tu ubicación GPS para registrar dónde creas cada tarea cuando lo solicites."
       }
     },
     "android": {
@@ -46,12 +45,7 @@
           "locationWhenInUsePermission": "Necesitamos acceso a tu ubicación GPS para registrar dónde creas cada tarea cuando lo solicites."
         }
       ],
-      [
-        "expo-local-authentication",
-        {
-          "faceIDPermission": "Usa Face ID o tu sensor biométrico para desbloquear tu perfil de cuaderno de forma rápida y segura."
-        }
-      ]
+      "expo-local-authentication"
     ],
     "web": {
       "favicon": "./assets/favicon.png"

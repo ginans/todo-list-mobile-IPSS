@@ -19,6 +19,7 @@ import {
   getBiometricCapability,
 } from '../../infra/device/biometric.service';
 import { AppButton } from '../ui/AppButton';
+import { AppConfirmDialog } from '../ui/AppConfirmDialog';
 import { paperPalette, semanticColors } from '../../theme/app-theme';
 import { styles } from './styles/peripherals-diagnostic.styles';
 
@@ -26,6 +27,7 @@ interface PeripheralsDiagnosticModalProps {
   visible: boolean;
   onDismiss: () => void;
   profileName: string;
+  onDeleteCurrentProfile?: () => Promise<void>;
   storageStats: {
     total: number;
     photosCount: number;
@@ -67,6 +69,7 @@ export const PeripheralsDiagnosticModal: React.FC<PeripheralsDiagnosticModalProp
   visible,
   onDismiss,
   profileName,
+  onDeleteCurrentProfile,
   storageStats,
 }) => {
   const [cameraStatus, setCameraStatus] = useState<PermissionStatus>(
@@ -86,6 +89,8 @@ export const PeripheralsDiagnosticModal: React.FC<PeripheralsDiagnosticModalProp
   const [gpsError, setGpsError] = useState<string | null>(null);
   const [isTestingGps, setIsTestingGps] = useState(false);
   const [biometricTestMessage, setBiometricTestMessage] = useState<string | null>(null);
+  const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
+  const [isDeletingProfile, setIsDeletingProfile] = useState(false);
 
   const refreshStatus = useCallback(async () => {
     const [cam, loc, bio] = await Promise.all([
@@ -324,6 +329,23 @@ export const PeripheralsDiagnosticModal: React.FC<PeripheralsDiagnosticModalProp
                 {storageStats.photosCount} fotos ({storageStats.photosSizeKb} KB) •{' '}
                 {storageStats.locationsCount} ubicaciones GPS.
               </Text>
+              {onDeleteCurrentProfile && (
+                <View style={styles.diagActionRow}>
+                  <Pressable
+                    onPress={() => setIsConfirmDeleteVisible(true)}
+                    style={styles.testBtn}
+                  >
+                    <MaterialCommunityIcons
+                      name="trash-can-outline"
+                      size={14}
+                      color={semanticColors.danger}
+                    />
+                    <Text style={[styles.testBtnText, { color: semanticColors.danger }]}>
+                      Eliminar mi perfil
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
             </View>
           </View>
 
@@ -332,6 +354,25 @@ export const PeripheralsDiagnosticModal: React.FC<PeripheralsDiagnosticModalProp
           </View>
         </ScrollView>
       </Modal>
+
+      <AppConfirmDialog
+        visible={isConfirmDeleteVisible}
+        title="¿Eliminar tu perfil?"
+        message={`Se eliminará permanentemente el perfil "${profileName}" junto con todas sus tareas guardadas en este dispositivo.`}
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        isDestructive
+        loading={isDeletingProfile}
+        onConfirm={async () => {
+          if (!onDeleteCurrentProfile) return;
+          setIsDeletingProfile(true);
+          await onDeleteCurrentProfile();
+          setIsDeletingProfile(false);
+          setIsConfirmDeleteVisible(false);
+          onDismiss();
+        }}
+        onCancel={() => setIsConfirmDeleteVisible(false)}
+      />
     </Portal>
   );
 };

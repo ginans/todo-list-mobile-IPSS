@@ -4,14 +4,16 @@ export const APP_MESSAGES = {
     PIN_INVALID_FORMAT: 'El PIN debe contener exactamente 4 dígitos numéricos.',
     PROFILE_DUPLICATE: 'Ya existe un perfil con ese nombre.',
     PIN_INCORRECT: 'PIN incorrecto. Intenta nuevamente.',
-    BIOMETRIC_PROMPT: 'Desbloquea tu cuaderno de tareas',
+    BIOMETRIC_PROMPT: 'Desbloquea tu cuaderno con huella digital',
     BIOMETRIC_CANCEL: 'Usar PIN',
-    BIOMETRIC_NOT_ENROLLED: 'No hay huellas ni rostro registrados en el dispositivo.',
-    BIOMETRIC_NO_HARDWARE: 'Este dispositivo no cuenta con sensor biométrico.',
-    BIOMETRIC_FAILED: 'Autenticación biométrica cancelada o no reconocida.',
-    BIOMETRIC_ERROR: 'Error al invocar el sensor biométrico.',
+    BIOMETRIC_NOT_ENROLLED: 'No hay huellas digitales registradas en el dispositivo.',
+    BIOMETRIC_NO_HARDWARE: 'Este dispositivo no cuenta con sensor de huella digital.',
+    BIOMETRIC_FAILED: 'Huella digital cancelada o no reconocida.',
+    BIOMETRIC_ERROR: 'Error al invocar el sensor de huella digital.',
     BIOMETRIC_UNAVAILABLE_WEB: 'No disponible en Web',
     BIOMETRIC_UNAVAILABLE: 'No disponible',
+    BIOMETRIC_OWNER_TAKEN: (ownerName: string) =>
+      `La huella digital ya está vinculada al perfil de ${ownerName}. Este perfil usará PIN de 4 dígitos.`,
   },
   DEVICE: {
     CAMERA_DENIED: 'Permiso de cámara denegado.',
@@ -26,6 +28,7 @@ export const APP_MESSAGES = {
     LOCATION_DENIED_DETAIL:
       'Para registrar la ubicación donde creas cada tarea, habilita el permiso de Ubicación en la configuración del dispositivo.',
     LOCATION_INVALID_COORDS: 'Las coordenadas recibidas por el GPS no son válidas.',
+    LOCATION_TIMEOUT: 'El GPS tardó demasiado en responder. Intenta nuevamente en un lugar con mejor señal.',
     LOCATION_ERROR: 'No se pudo obtener la ubicación GPS actual.',
   },
   TASKS: {

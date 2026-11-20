@@ -107,7 +107,7 @@ export const captureFromCamera = async (): Promise<IPeripheralResult<IPhotoCaptu
 
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ['images'],
-      allowsEditing: true,
+      allowsEditing: false,
       quality: 0.85,
     });
 
@@ -149,7 +149,7 @@ export const pickFromGallery = async (): Promise<IPeripheralResult<IPhotoCapture
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
-      allowsEditing: true,
+      allowsEditing: false,
       quality: 0.85,
     });
 

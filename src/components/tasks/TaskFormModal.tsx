@@ -117,54 +117,60 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const handleCapturePhoto = async (source: 'camera' | 'gallery') => {
     setPeripheralError(null);
     setIsCapturingPhoto(true);
-    const result =
-      source === 'camera' ? await captureFromCamera() : await pickFromGallery();
-    setIsCapturingPhoto(false);
+    try {
+      const result =
+        source === 'camera' ? await captureFromCamera() : await pickFromGallery();
 
-    if (result.canceled) {
-      return;
+      if (result.canceled) {
+        return;
+      }
+
+      if (result.permissionStatus === PermissionStatus.DENIED) {
+        setPermissionAlert({
+          title: source === 'camera' ? 'Permiso de Cámara' : 'Permiso de Galería',
+          message:
+            source === 'camera'
+              ? APP_MESSAGES.DEVICE.CAMERA_DENIED_DETAIL
+              : APP_MESSAGES.DEVICE.GALLERY_DENIED_DETAIL,
+        });
+        return;
+      }
+
+      if (!result.success || !result.data) {
+        setPeripheralError(result.error || APP_MESSAGES.DEVICE.CAMERA_ERROR);
+        return;
+      }
+
+      setPhotoUri(result.data.uri);
+      setPhotoSizeKb(result.data.sizeKb);
+    } finally {
+      setIsCapturingPhoto(false);
     }
-
-    if (result.permissionStatus === PermissionStatus.DENIED) {
-      setPermissionAlert({
-        title: source === 'camera' ? 'Permiso de Cámara' : 'Permiso de Galería',
-        message:
-          source === 'camera'
-            ? APP_MESSAGES.DEVICE.CAMERA_DENIED_DETAIL
-            : APP_MESSAGES.DEVICE.GALLERY_DENIED_DETAIL,
-      });
-      return;
-    }
-
-    if (!result.success || !result.data) {
-      setPeripheralError(result.error || APP_MESSAGES.DEVICE.CAMERA_ERROR);
-      return;
-    }
-
-    setPhotoUri(result.data.uri);
-    setPhotoSizeKb(result.data.sizeKb);
   };
 
   const handleCaptureLocation = async () => {
     setPeripheralError(null);
     setIsCapturingLocation(true);
-    const result = await getCurrentLocation();
-    setIsCapturingLocation(false);
+    try {
+      const result = await getCurrentLocation();
 
-    if (result.permissionStatus === PermissionStatus.DENIED) {
-      setPermissionAlert({
-        title: 'Permiso de Ubicación GPS',
-        message: APP_MESSAGES.DEVICE.LOCATION_DENIED_DETAIL,
-      });
-      return;
+      if (result.permissionStatus === PermissionStatus.DENIED) {
+        setPermissionAlert({
+          title: 'Permiso de Ubicación GPS',
+          message: APP_MESSAGES.DEVICE.LOCATION_DENIED_DETAIL,
+        });
+        return;
+      }
+
+      if (!result.success || !result.data) {
+        setPeripheralError(result.error || APP_MESSAGES.DEVICE.LOCATION_ERROR);
+        return;
+      }
+
+      setLocation(result.data);
+    } finally {
+      setIsCapturingLocation(false);
     }
-
-    if (!result.success || !result.data) {
-      setPeripheralError(result.error || APP_MESSAGES.DEVICE.LOCATION_ERROR);
-      return;
-    }
-
-    setLocation(result.data);
   };
 
   const handleSubmit = async () => {
@@ -201,13 +207,11 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     }
   };
 
-  const isBusy = loading || isCapturingPhoto || isCapturingLocation;
-
   return (
     <Portal>
       <Modal
         visible={visible}
-        onDismiss={isBusy ? undefined : onDismiss}
+        onDismiss={loading ? undefined : onDismiss}
         contentContainerStyle={styles.modalContainer}
       >
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -230,7 +234,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             }}
             error={errors.title}
             maxLength={60}
-            disabled={isBusy}
+            disabled={loading}
           />
 
           <AppInput
@@ -241,7 +245,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             multiline
             numberOfLines={2}
             maxLength={200}
-            disabled={isBusy}
+            disabled={loading}
           />
 
           <View style={styles.prioritySection}>
@@ -254,7 +258,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   <Pressable
                     key={option.value}
                     onPress={() => setPriority(option.value)}
-                    disabled={isBusy}
+                    disabled={loading}
                     style={[
                       styles.priorityButton,
                       isSelected && {
@@ -304,7 +308,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   }}
                   style={styles.removeChipBtn}
                   accessibilityLabel="Quitar foto adjunta"
-                  disabled={isBusy}
+                  disabled={loading || isCapturingPhoto}
                 >
                   <MaterialCommunityIcons
                     name="close-circle-outline"
@@ -318,7 +322,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 <Pressable
                   onPress={() => handleCapturePhoto('camera')}
                   style={styles.peripheralButton}
-                  disabled={isBusy}
+                  disabled={loading || isCapturingPhoto}
                   accessibilityRole="button"
                 >
                   {isCapturingPhoto ? (
@@ -336,7 +340,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 <Pressable
                   onPress={() => handleCapturePhoto('gallery')}
                   style={styles.peripheralButton}
-                  disabled={isBusy}
+                  disabled={loading || isCapturingPhoto}
                   accessibilityRole="button"
                 >
                   <MaterialCommunityIcons
@@ -372,19 +376,23 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   onPress={handleCaptureLocation}
                   style={styles.removeChipBtn}
                   accessibilityLabel="Actualizar ubicación GPS"
-                  disabled={isBusy}
+                  disabled={loading || isCapturingLocation}
                 >
-                  <MaterialCommunityIcons
-                    name="refresh"
-                    size={20}
-                    color={semanticColors.success}
-                  />
+                  {isCapturingLocation ? (
+                    <ActivityIndicator size={16} color={semanticColors.success} />
+                  ) : (
+                    <MaterialCommunityIcons
+                      name="refresh"
+                      size={20}
+                      color={semanticColors.success}
+                    />
+                  )}
                 </Pressable>
                 <Pressable
                   onPress={() => setLocation(null)}
                   style={styles.removeChipBtn}
                   accessibilityLabel="Quitar ubicación GPS"
-                  disabled={isBusy}
+                  disabled={loading}
                 >
                   <MaterialCommunityIcons
                     name="close-circle-outline"
@@ -397,7 +405,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               <Pressable
                 onPress={handleCaptureLocation}
                 style={styles.peripheralButton}
-                disabled={isBusy}
+                disabled={loading || isCapturingLocation}
                 accessibilityRole="button"
               >
                 {isCapturingLocation ? (
@@ -427,7 +435,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               label="Cancelar"
               onPress={onDismiss}
               variant="ghost"
-              disabled={isBusy}
+              disabled={loading}
               style={styles.actionButton}
             />
             <AppButton
@@ -435,7 +443,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               onPress={handleSubmit}
               variant="primary"
               loading={loading}
-              disabled={isBusy}
+              disabled={loading}
               icon={isEditing ? 'check' : 'plus'}
               style={styles.actionButton}
             />

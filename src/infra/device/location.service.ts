@@ -5,6 +5,8 @@ import { IPeripheralResult } from '../../core/device/interfaces/peripheral-resul
 import { ITaskLocation } from '../../core/task/interfaces/task-location.interface';
 import { APP_MESSAGES } from '../../constants/messages.constants';
 
+const GPS_TIMEOUT_MS = 3500;
+
 const mapExpoLocationPermission = (status: Location.PermissionStatus): PermissionStatus => {
   if (status === Location.PermissionStatus.GRANTED) {
     return PermissionStatus.GRANTED;
@@ -80,6 +82,37 @@ const resolveReadableAddress = async (
   }
 };
 
+const fetchPositionWithTimeout = async (): Promise<Location.LocationObject | null> => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  const timeoutPromise = new Promise<null>((resolve) => {
+    timeoutId = setTimeout(() => resolve(null), GPS_TIMEOUT_MS);
+  });
+
+  try {
+    const current = await Promise.race([
+      Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      }),
+      timeoutPromise,
+    ]);
+
+    if (current) {
+      return current;
+    }
+
+    if (Platform.OS !== 'web') {
+      return await Location.getLastKnownPositionAsync();
+    }
+
+    return null;
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  }
+};
+
 export const getCurrentLocation = async (): Promise<IPeripheralResult<ITaskLocation>> => {
   try {
     const permissionStatus = await requestLocationPermission();
@@ -91,9 +124,14 @@ export const getCurrentLocation = async (): Promise<IPeripheralResult<ITaskLocat
       };
     }
 
-    const position = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Balanced,
-    });
+    const position = await fetchPositionWithTimeout();
+    if (!position) {
+      return {
+        success: false,
+        permissionStatus,
+        error: APP_MESSAGES.DEVICE.LOCATION_TIMEOUT,
+      };
+    }
 
     const { latitude, longitude, accuracy } = position.coords;
     if (!isValidCoordinates(latitude, longitude)) {

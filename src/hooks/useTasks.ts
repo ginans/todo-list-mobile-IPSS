@@ -16,11 +16,17 @@ export const useTasks = (userId?: string) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const repository = useMemo(
-    () => TaskAdapterFactory.getRepository(userId),
+    () => (userId ? TaskAdapterFactory.getRepository(userId) : null),
     [userId]
   );
 
   const loadTasks = useCallback(async () => {
+    if (!repository) {
+      setTasks([]);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     try {
@@ -36,6 +42,7 @@ export const useTasks = (userId?: string) => {
   }, [repository]);
 
   useEffect(() => {
+    setTasks([]);
     setFilter('ALL');
     setSearchQuery('');
     loadTasks();
@@ -43,6 +50,7 @@ export const useTasks = (userId?: string) => {
 
   const createTask = useCallback(
     async (input: CreateTaskInput): Promise<boolean> => {
+      if (!repository) return false;
       setIsActionLoading(true);
       setError(null);
       try {
@@ -66,6 +74,7 @@ export const useTasks = (userId?: string) => {
 
   const updateTask = useCallback(
     async (id: string, input: UpdateTaskInput): Promise<boolean> => {
+      if (!repository) return false;
       setIsActionLoading(true);
       setError(null);
       try {
@@ -101,6 +110,7 @@ export const useTasks = (userId?: string) => {
 
   const deleteTask = useCallback(
     async (id: string): Promise<boolean> => {
+      if (!repository) return false;
       setIsActionLoading(true);
       setError(null);
       try {

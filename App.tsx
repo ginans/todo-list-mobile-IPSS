@@ -43,13 +43,17 @@ export default function App() {
   const {
     profiles,
     activeProfile,
+    lastProfileId,
+    isSwitchingProfile,
     isAuthLoading,
     authError,
     biometricCapability,
     createProfile,
     unlockWithPin,
     unlockWithBiometrics,
-    logout,
+    openProfileSwitcher,
+    cancelProfileSwitch,
+    deleteProfile,
     clearAuthError,
   } = useAuthProfiles();
 
@@ -136,9 +140,12 @@ export default function App() {
                 <View style={styles.loadingContainer}>
                   <ActivityIndicator size="large" color={appTheme.colors.primary} />
                 </View>
-              ) : !activeProfile ? (
+              ) : !activeProfile || isSwitchingProfile ? (
                 <ProfileAuthScreen
                   profiles={profiles}
+                  defaultProfileId={lastProfileId}
+                  canGoBack={Boolean(activeProfile && isSwitchingProfile)}
+                  onGoBack={cancelProfileSwitch}
                   biometricCapability={biometricCapability}
                   authError={authError}
                   onCreateProfile={createProfile}
@@ -151,7 +158,7 @@ export default function App() {
                   <TaskHeader
                     profileName={activeProfile.name}
                     onOpenDiagnostics={() => setIsDiagnosticsVisible(true)}
-                    onLogout={logout}
+                    onLogout={openProfileSwitcher}
                     stats={stats}
                   />
 
@@ -242,6 +249,9 @@ export default function App() {
                     visible={isDiagnosticsVisible}
                     onDismiss={() => setIsDiagnosticsVisible(false)}
                     profileName={activeProfile.name}
+                    onDeleteCurrentProfile={async () => {
+                      await deleteProfile(activeProfile.id);
+                    }}
                     storageStats={{
                       total: stats.total,
                       photosCount: stats.photosCount,
