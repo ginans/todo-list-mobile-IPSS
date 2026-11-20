@@ -2,13 +2,21 @@ import React, { useState } from 'react';
 import {
   View,
   FlatList,
+  Image,
   RefreshControl,
   KeyboardAvoidingView,
   Platform,
   ImageBackground,
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { PaperProvider, FAB, Snackbar, ActivityIndicator } from 'react-native-paper';
+import {
+  PaperProvider,
+  FAB,
+  Snackbar,
+  ActivityIndicator,
+  Modal,
+  Portal,
+} from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
 
 import { appTheme } from './src/theme/app-theme';
@@ -19,11 +27,13 @@ import { CreateTaskInput } from './src/core/task/types/create-task.type';
 import { UpdateTaskInput } from './src/core/task/types/update-task.type';
 
 import { ProfileAuthScreen } from './src/components/auth/ProfileAuthScreen';
+import { PeripheralsDiagnosticModal } from './src/components/device/PeripheralsDiagnosticModal';
 import { TaskHeader } from './src/components/tasks/TaskHeader';
 import { TaskFilterTabs } from './src/components/tasks/TaskFilterTabs';
 import { TaskItem } from './src/components/tasks/TaskItem';
 import { TaskFormModal } from './src/components/tasks/TaskFormModal';
 import { TaskEmptyState } from './src/components/tasks/TaskEmptyState';
+import { AppButton } from './src/components/ui/AppButton';
 import { AppConfirmDialog } from './src/components/ui/AppConfirmDialog';
 import { styles } from './src/styles/app.styles';
 
@@ -61,6 +71,8 @@ export default function App() {
   } = useTasks(activeProfile?.id);
 
   const [isFormModalVisible, setIsFormModalVisible] = useState(false);
+  const [isDiagnosticsVisible, setIsDiagnosticsVisible] = useState(false);
+  const [previewPhotoUri, setPreviewPhotoUri] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<ITask | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<ITask | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -138,6 +150,7 @@ export default function App() {
                 <>
                   <TaskHeader
                     profileName={activeProfile.name}
+                    onOpenDiagnostics={() => setIsDiagnosticsVisible(true)}
                     onLogout={logout}
                     stats={stats}
                   />
@@ -168,6 +181,7 @@ export default function App() {
                           onToggleStatus={toggleStatus}
                           onEdit={handleOpenEdit}
                           onDelete={setTaskToDelete}
+                          onPreviewPhoto={setPreviewPhotoUri}
                         />
                       )}
                       contentContainerStyle={styles.listContent}
@@ -223,6 +237,40 @@ export default function App() {
                     onCancel={() => setTaskToDelete(null)}
                     loading={isActionLoading}
                   />
+
+                  <PeripheralsDiagnosticModal
+                    visible={isDiagnosticsVisible}
+                    onDismiss={() => setIsDiagnosticsVisible(false)}
+                    profileName={activeProfile.name}
+                    storageStats={{
+                      total: stats.total,
+                      photosCount: stats.photosCount,
+                      photosSizeKb: stats.photosSizeKb,
+                      locationsCount: stats.locationsCount,
+                    }}
+                  />
+
+                  <Portal>
+                    <Modal
+                      visible={Boolean(previewPhotoUri)}
+                      onDismiss={() => setPreviewPhotoUri(null)}
+                      contentContainerStyle={styles.photoModalContainer}
+                    >
+                      {previewPhotoUri && (
+                        <Image
+                          source={{ uri: previewPhotoUri }}
+                          style={styles.photoModalImage}
+                          resizeMode="contain"
+                        />
+                      )}
+                      <AppButton
+                        label="Cerrar vista previa"
+                        onPress={() => setPreviewPhotoUri(null)}
+                        variant="primary"
+                        compact
+                      />
+                    </Modal>
+                  </Portal>
 
                   <Snackbar
                     visible={Boolean(toastMessage)}
