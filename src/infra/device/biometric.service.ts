@@ -5,6 +5,7 @@ import {
   IBiometricCapability,
   IPeripheralResult,
 } from '../../core/device/interfaces/peripheral-result.interface';
+import { APP_MESSAGES } from '../../constants/messages.constants';
 
 export const getBiometricCapability = async (): Promise<IBiometricCapability> => {
   if (Platform.OS === 'web') {
@@ -12,7 +13,7 @@ export const getBiometricCapability = async (): Promise<IBiometricCapability> =>
       available: false,
       hasHardware: false,
       isEnrolled: false,
-      label: 'No disponible en Web',
+      label: APP_MESSAGES.AUTH.BIOMETRIC_UNAVAILABLE_WEB,
     };
   }
 
@@ -41,13 +42,13 @@ export const getBiometricCapability = async (): Promise<IBiometricCapability> =>
       available: false,
       hasHardware: false,
       isEnrolled: false,
-      label: 'No disponible',
+      label: APP_MESSAGES.AUTH.BIOMETRIC_UNAVAILABLE,
     };
   }
 };
 
 export const authenticateWithBiometrics = async (
-  promptMessage = 'Desbloquea tu cuaderno de tareas'
+  promptMessage: string = APP_MESSAGES.AUTH.BIOMETRIC_PROMPT
 ): Promise<IPeripheralResult<boolean>> => {
   const capability = await getBiometricCapability();
   if (!capability.available) {
@@ -55,16 +56,16 @@ export const authenticateWithBiometrics = async (
       success: false,
       permissionStatus: PermissionStatus.UNAVAILABLE,
       error: capability.hasHardware
-        ? 'No hay huellas ni rostro registrados en el dispositivo.'
-        : 'Este dispositivo no cuenta con sensor biométrico.',
+        ? APP_MESSAGES.AUTH.BIOMETRIC_NOT_ENROLLED
+        : APP_MESSAGES.AUTH.BIOMETRIC_NO_HARDWARE,
     };
   }
 
   try {
     const result = await LocalAuthentication.authenticateAsync({
       promptMessage,
-      cancelLabel: 'Usar PIN',
-      fallbackLabel: 'Usar PIN',
+      cancelLabel: APP_MESSAGES.AUTH.BIOMETRIC_CANCEL,
+      fallbackLabel: APP_MESSAGES.AUTH.BIOMETRIC_CANCEL,
       disableDeviceFallback: true,
     });
 
@@ -80,7 +81,7 @@ export const authenticateWithBiometrics = async (
       success: false,
       permissionStatus: PermissionStatus.DENIED,
       canceled: result.error === 'user_cancel' || result.error === 'system_cancel',
-      error: 'Autenticación biométrica cancelada o no reconocida.',
+      error: APP_MESSAGES.AUTH.BIOMETRIC_FAILED,
     };
   } catch (error) {
     return {
@@ -89,7 +90,7 @@ export const authenticateWithBiometrics = async (
       error:
         error instanceof Error
           ? error.message
-          : 'Error al invocar el sensor biométrico.',
+          : APP_MESSAGES.AUTH.BIOMETRIC_ERROR,
     };
   }
 };

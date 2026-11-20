@@ -3,6 +3,7 @@ import * as Location from 'expo-location';
 import { PermissionStatus } from '../../core/device/enums/permission-status.enum';
 import { IPeripheralResult } from '../../core/device/interfaces/peripheral-result.interface';
 import { ITaskLocation } from '../../core/task/interfaces/task-location.interface';
+import { APP_MESSAGES } from '../../constants/messages.constants';
 
 const mapExpoLocationPermission = (status: Location.PermissionStatus): PermissionStatus => {
   if (status === Location.PermissionStatus.GRANTED) {
@@ -86,7 +87,7 @@ export const getCurrentLocation = async (): Promise<IPeripheralResult<ITaskLocat
       return {
         success: false,
         permissionStatus,
-        error: 'Permiso de ubicación GPS denegado.',
+        error: APP_MESSAGES.DEVICE.LOCATION_DENIED,
       };
     }
 
@@ -99,7 +100,7 @@ export const getCurrentLocation = async (): Promise<IPeripheralResult<ITaskLocat
       return {
         success: false,
         permissionStatus,
-        error: 'Las coordenadas recibidas por el GPS no son válidas.',
+        error: APP_MESSAGES.DEVICE.LOCATION_INVALID_COORDS,
       };
     }
 
@@ -123,7 +124,7 @@ export const getCurrentLocation = async (): Promise<IPeripheralResult<ITaskLocat
       error:
         error instanceof Error
           ? error.message
-          : 'No se pudo obtener la ubicación GPS actual.',
+          : APP_MESSAGES.DEVICE.LOCATION_ERROR,
     };
   }
 };

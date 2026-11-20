@@ -4,19 +4,25 @@ import { TaskStorageAdapter } from '../adapters/task-storage.adapter';
 import { TaskHttpAdapter } from '../adapters/task-http.adapter';
 
 export class TaskAdapterFactory {
-  private static instance: ITaskRepository | null = null;
+  private static instances = new Map<string, ITaskRepository>();
 
-  public static getRepository(): ITaskRepository {
-    if (!TaskAdapterFactory.instance) {
-      TaskAdapterFactory.instance = envConfig.isDemoMode
-        ? new TaskStorageAdapter()
-        : new TaskHttpAdapter(envConfig.apiUrl);
+  public static getRepository(userId?: string): ITaskRepository {
+    const cacheKey = `${envConfig.isDemoMode ? 'local' : 'http'}:${userId ?? 'default'}`;
+
+    const existing = TaskAdapterFactory.instances.get(cacheKey);
+    if (existing) {
+      return existing;
     }
 
-    return TaskAdapterFactory.instance;
+    const instance: ITaskRepository = envConfig.isDemoMode
+      ? new TaskStorageAdapter(userId)
+      : new TaskHttpAdapter(envConfig.apiUrl);
+
+    TaskAdapterFactory.instances.set(cacheKey, instance);
+    return instance;
   }
 
   public static resetInstance(): void {
-    TaskAdapterFactory.instance = null;
+    TaskAdapterFactory.instances.clear();
   }
 }

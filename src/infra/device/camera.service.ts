@@ -7,6 +7,7 @@ import {
   IPeripheralResult,
   IPhotoCaptureData,
 } from '../../core/device/interfaces/peripheral-result.interface';
+import { APP_MESSAGES } from '../../constants/messages.constants';
 
 const MAX_IMAGE_WIDTH = 1080;
 const JPEG_COMPRESSION = 0.7;
@@ -100,7 +101,7 @@ export const captureFromCamera = async (): Promise<IPeripheralResult<IPhotoCaptu
       return {
         success: false,
         permissionStatus,
-        error: 'Permiso de cámara denegado.',
+        error: APP_MESSAGES.DEVICE.CAMERA_DENIED,
       };
     }
 
@@ -130,7 +131,7 @@ export const captureFromCamera = async (): Promise<IPeripheralResult<IPhotoCaptu
     return {
       success: false,
       permissionStatus: PermissionStatus.UNAVAILABLE,
-      error: error instanceof Error ? error.message : 'No se pudo acceder a la cámara.',
+      error: error instanceof Error ? error.message : APP_MESSAGES.DEVICE.CAMERA_ERROR,
     };
   }
 };
@@ -142,7 +143,7 @@ export const pickFromGallery = async (): Promise<IPeripheralResult<IPhotoCapture
       return {
         success: false,
         permissionStatus,
-        error: 'Permiso de galería denegado.',
+        error: APP_MESSAGES.DEVICE.GALLERY_DENIED,
       };
     }
 
@@ -172,7 +173,7 @@ export const pickFromGallery = async (): Promise<IPeripheralResult<IPhotoCapture
     return {
       success: false,
       permissionStatus: PermissionStatus.UNAVAILABLE,
-      error: error instanceof Error ? error.message : 'No se pudo abrir la galería.',
+      error: error instanceof Error ? error.message : APP_MESSAGES.DEVICE.GALLERY_ERROR,
     };
   }
 };
