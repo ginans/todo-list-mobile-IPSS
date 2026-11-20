@@ -10,7 +10,11 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.ginanssteam.todolistmobileipss",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Necesitamos acceso a la cámara para capturar fotos y adjuntarlas a tus tareas.",
+        "NSPhotoLibraryUsageDescription": "Necesitamos acceso a tu galería para adjuntar imágenes existentes a tus tareas.",
+        "NSLocationWhenInUseUsageDescription": "Necesitamos acceso a tu ubicación GPS para registrar dónde creas cada tarea cuando lo solicites.",
+        "NSFaceIDUsageDescription": "Usa Face ID o tu sensor biométrico para desbloquear tu perfil de cuaderno de forma rápida y segura."
       }
     },
     "android": {
@@ -19,8 +23,36 @@
         "foregroundImage": "./assets/android-icon-foreground.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.ginanssteam.todolistmobileipss"
+      "package": "com.ginanssteam.todolistmobileipss",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ]
     },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Necesitamos acceso a la cámara para capturar fotos y adjuntarlas a tus tareas.",
+          "photosPermission": "Necesitamos acceso a tu galería para adjuntar imágenes existentes a tus tareas."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Necesitamos acceso a tu ubicación GPS para registrar dónde creas cada tarea cuando lo solicites."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Usa Face ID o tu sensor biométrico para desbloquear tu perfil de cuaderno de forma rápida y segura."
+        }
+      ]
+    ],
     "web": {
       "favicon": "./assets/favicon.png"
     },
