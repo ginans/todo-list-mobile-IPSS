@@ -1,27 +1,39 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   FlatList,
+  Image,
   RefreshControl,
   KeyboardAvoidingView,
   Platform,
   ImageBackground,
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { PaperProvider, FAB, Snackbar, ActivityIndicator } from 'react-native-paper';
+import {
+  PaperProvider,
+  FAB,
+  Snackbar,
+  ActivityIndicator,
+  Modal,
+  Portal,
+} from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
 
 import { appTheme } from './src/theme/app-theme';
+import { useAuthProfiles } from './src/hooks/useAuthProfiles';
 import { useTasks } from './src/hooks/useTasks';
 import { ITask } from './src/core/task/interfaces/task.interface';
 import { CreateTaskInput } from './src/core/task/types/create-task.type';
 import { UpdateTaskInput } from './src/core/task/types/update-task.type';
 
+import { ProfileAuthScreen } from './src/components/auth/ProfileAuthScreen';
+import { ProfileSettingsModal } from './src/components/auth/ProfileSettingsModal';
 import { TaskHeader } from './src/components/tasks/TaskHeader';
 import { TaskFilterTabs } from './src/components/tasks/TaskFilterTabs';
 import { TaskItem } from './src/components/tasks/TaskItem';
 import { TaskFormModal } from './src/components/tasks/TaskFormModal';
 import { TaskEmptyState } from './src/components/tasks/TaskEmptyState';
+import { AppButton } from './src/components/ui/AppButton';
 import { AppConfirmDialog } from './src/components/ui/AppConfirmDialog';
 import { styles } from './src/styles/app.styles';
 
@@ -29,10 +41,26 @@ const paperTexture = require('./assets/paper-texture.png');
 
 export default function App() {
   const {
+    profiles,
+    activeProfile,
+    lastProfileId,
+    isAuthLoading,
+    authError,
+    biometricCapability,
+    createProfile,
+    unlockWithPin,
+    unlockWithBiometrics,
+    deleteProfile,
+    logout,
+    clearAuthError,
+  } = useAuthProfiles();
+
+  const {
     tasks,
     allTasksCount,
     isLoading,
     isActionLoading,
+    error: tasksError,
     filter,
     setFilter,
     searchQuery,
@@ -43,9 +71,11 @@ export default function App() {
     updateTask,
     deleteTask,
     toggleStatus,
-  } = useTasks();
+  } = useTasks(activeProfile?.id);
 
   const [isFormModalVisible, setIsFormModalVisible] = useState(false);
+  const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
+  const [previewPhotoUri, setPreviewPhotoUri] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<ITask | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<ITask | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -53,6 +83,12 @@ export default function App() {
   const showToast = (message: string) => {
     setToastMessage(message);
   };
+
+  useEffect(() => {
+    if (tasksError) {
+      setToastMessage(`⚠ ${tasksError}`);
+    }
+  }, [tasksError]);
 
   const handleOpenCreate = () => {
     setEditingTask(null);
@@ -105,98 +141,161 @@ export default function App() {
               style={styles.keyboardContainer}
               behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
-              <TaskHeader stats={stats} />
-
-              <TaskFilterTabs
-                filter={filter}
-                onFilterChange={setFilter}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                counts={{
-                  all: allTasksCount,
-                  pending: stats.pending,
-                  completed: stats.completed,
-                }}
-              />
-
-              {isLoading && tasks.length === 0 ? (
+              {isAuthLoading ? (
                 <View style={styles.loadingContainer}>
                   <ActivityIndicator size="large" color={appTheme.colors.primary} />
                 </View>
+              ) : !activeProfile ? (
+                <ProfileAuthScreen
+                  profiles={profiles}
+                  defaultProfileId={lastProfileId}
+                  biometricCapability={biometricCapability}
+                  authError={authError}
+                  onCreateProfile={createProfile}
+                  onUnlockWithPin={unlockWithPin}
+                  onUnlockWithBiometrics={unlockWithBiometrics}
+                  onClearError={clearAuthError}
+                />
               ) : (
-                <FlatList
-                  data={tasks}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => (
-                    <TaskItem
-                      task={item}
-                      onToggleStatus={toggleStatus}
-                      onEdit={handleOpenEdit}
-                      onDelete={setTaskToDelete}
+                <>
+                  <TaskHeader
+                    profileName={activeProfile.name}
+                    onOpenProfile={() => setIsProfileModalVisible(true)}
+                    onLogout={logout}
+                    stats={stats}
+                  />
+
+                  <TaskFilterTabs
+                    filter={filter}
+                    onFilterChange={setFilter}
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    counts={{
+                      all: allTasksCount,
+                      pending: stats.pending,
+                      completed: stats.completed,
+                    }}
+                  />
+
+                  {isLoading && tasks.length === 0 ? (
+                    <View style={styles.loadingContainer}>
+                      <ActivityIndicator size="large" color={appTheme.colors.primary} />
+                    </View>
+                  ) : (
+                    <FlatList
+                      data={tasks}
+                      keyExtractor={(item) => item.id}
+                      renderItem={({ item }) => (
+                        <TaskItem
+                          task={item}
+                          onToggleStatus={toggleStatus}
+                          onEdit={handleOpenEdit}
+                          onDelete={setTaskToDelete}
+                          onPreviewPhoto={setPreviewPhotoUri}
+                        />
+                      )}
+                      contentContainerStyle={styles.listContent}
+                      refreshControl={
+                        <RefreshControl
+                          refreshing={isLoading}
+                          onRefresh={loadTasks}
+                          colors={[appTheme.colors.primary]}
+                          tintColor={appTheme.colors.primary}
+                        />
+                      }
+                      ListEmptyComponent={
+                        <TaskEmptyState
+                          hasFilters={filter !== 'ALL' || Boolean(searchQuery)}
+                          onClearFilters={() => {
+                            setFilter('ALL');
+                            setSearchQuery('');
+                          }}
+                          onAddTask={handleOpenCreate}
+                        />
+                      }
                     />
                   )}
-                  contentContainerStyle={styles.listContent}
-                  refreshControl={
-                    <RefreshControl
-                      refreshing={isLoading}
-                      onRefresh={loadTasks}
-                      colors={[appTheme.colors.primary]}
-                      tintColor={appTheme.colors.primary}
-                    />
-                  }
-                  ListEmptyComponent={
-                    <TaskEmptyState
-                      hasFilters={filter !== 'ALL' || Boolean(searchQuery)}
-                      onClearFilters={() => {
-                        setFilter('ALL');
-                        setSearchQuery('');
-                      }}
-                      onAddTask={handleOpenCreate}
-                    />
-                  }
-                />
+
+                  <FAB
+                    icon="plus"
+                    label="Nueva Tarea"
+                    onPress={handleOpenCreate}
+                    style={styles.fab}
+                    color="#FFFDF8"
+                  />
+
+                  <TaskFormModal
+                    visible={isFormModalVisible}
+                    onDismiss={() => setIsFormModalVisible(false)}
+                    onSubmit={handleFormSubmit}
+                    initialTask={editingTask}
+                    loading={isActionLoading}
+                  />
+
+                  <AppConfirmDialog
+                    visible={Boolean(taskToDelete)}
+                    title="¿Eliminar esta tarea?"
+                    message={
+                      taskToDelete
+                        ? `Se eliminará permanentemente la tarea "${taskToDelete.title}". Esta acción no se puede deshacer.`
+                        : ''
+                    }
+                    confirmLabel="Eliminar"
+                    cancelLabel="Cancelar"
+                    isDestructive
+                    onConfirm={handleConfirmDelete}
+                    onCancel={() => setTaskToDelete(null)}
+                    loading={isActionLoading}
+                  />
+
+                  <ProfileSettingsModal
+                    visible={isProfileModalVisible}
+                    onDismiss={() => setIsProfileModalVisible(false)}
+                    profile={activeProfile}
+                    biometricLabel={biometricCapability.label}
+                    onDeleteProfile={async () => {
+                      await deleteProfile(activeProfile.id);
+                    }}
+                    storageStats={{
+                      total: stats.total,
+                      photosCount: stats.photosCount,
+                      photosSizeKb: stats.photosSizeKb,
+                      locationsCount: stats.locationsCount,
+                    }}
+                  />
+
+                  <Portal>
+                    <Modal
+                      visible={Boolean(previewPhotoUri)}
+                      onDismiss={() => setPreviewPhotoUri(null)}
+                      contentContainerStyle={styles.photoModalContainer}
+                    >
+                      {previewPhotoUri && (
+                        <Image
+                          source={{ uri: previewPhotoUri }}
+                          style={styles.photoModalImage}
+                          resizeMode="contain"
+                        />
+                      )}
+                      <AppButton
+                        label="Cerrar vista previa"
+                        onPress={() => setPreviewPhotoUri(null)}
+                        variant="primary"
+                        compact
+                      />
+                    </Modal>
+                  </Portal>
+
+                  <Snackbar
+                    visible={Boolean(toastMessage)}
+                    onDismiss={() => setToastMessage(null)}
+                    duration={2600}
+                    style={styles.snackbar}
+                  >
+                    {toastMessage}
+                  </Snackbar>
+                </>
               )}
-
-              <FAB
-                icon="plus"
-                label="Nueva Tarea"
-                onPress={handleOpenCreate}
-                style={styles.fab}
-                color="#FFFDF8"
-              />
-
-              <TaskFormModal
-                visible={isFormModalVisible}
-                onDismiss={() => setIsFormModalVisible(false)}
-                onSubmit={handleFormSubmit}
-                initialTask={editingTask}
-                loading={isActionLoading}
-              />
-
-              <AppConfirmDialog
-                visible={Boolean(taskToDelete)}
-                title="¿Eliminar esta tarea?"
-                message={
-                  taskToDelete
-                    ? `Se eliminará permanentemente la tarea "${taskToDelete.title}". Esta acción no se puede deshacer.`
-                    : ''
-                }
-                confirmLabel="Eliminar"
-                cancelLabel="Cancelar"
-                isDestructive
-                onConfirm={handleConfirmDelete}
-                onCancel={() => setTaskToDelete(null)}
-                loading={isActionLoading}
-              />
-
-              <Snackbar
-                visible={Boolean(toastMessage)}
-                onDismiss={() => setToastMessage(null)}
-                duration={2600}
-                style={styles.snackbar}
-              >
-                {toastMessage}
-              </Snackbar>
             </KeyboardAvoidingView>
           </SafeAreaView>
         </ImageBackground>

@@ -1,0 +1,6 @@
+export enum PermissionStatus {
+  GRANTED = 'GRANTED',
+  DENIED = 'DENIED',
+  UNDETERMINED = 'UNDETERMINED',
+  UNAVAILABLE = 'UNAVAILABLE',
+}

@@ -1,8 +1,10 @@
 import React from 'react';
-import { Text, View, Pressable } from 'react-native';
+import { Image, Text, View, Pressable } from 'react-native';
 import { IconButton } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ITask } from '../../core/task/interfaces/task.interface';
 import { TaskStatus } from '../../core/task/enums/task-status.enum';
+import { formatCoordinates } from '../../infra/device/location.service';
 import { AppCard } from '../ui/AppCard';
 import { AppBadge } from '../ui/AppBadge';
 import { appTheme, semanticColors } from '../../theme/app-theme';
@@ -13,6 +15,7 @@ interface TaskItemProps {
   onToggleStatus: (id: string) => void;
   onEdit: (task: ITask) => void;
   onDelete: (task: ITask) => void;
+  onPreviewPhoto?: (uri: string) => void;
 }
 
 export const TaskItem: React.FC<TaskItemProps> = ({
@@ -20,9 +23,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   onToggleStatus,
   onEdit,
   onDelete,
+  onPreviewPhoto,
 }) => {
   const isCompleted = task.status === TaskStatus.COMPLETED;
   const hasDescription = Boolean(task.description?.trim());
+  const hasAttachments = Boolean(task.photoUri || task.location);
 
   const formatDate = (isoString: string) => {
     try {
@@ -37,6 +42,16 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       return '';
     }
   };
+
+  const locationLabel = task.location
+    ? task.location.address
+      ? `${task.location.address}${
+          task.location.accuracy !== null ? ` (±${task.location.accuracy}m)` : ''
+        }`
+      : `${formatCoordinates(task.location.latitude, task.location.longitude)}${
+          task.location.accuracy !== null ? ` (±${task.location.accuracy}m)` : ''
+        }`
+    : null;
 
   return (
     <AppCard
@@ -96,6 +111,44 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         >
           {task.description}
         </Text>
+      )}
+
+      {hasAttachments && (
+        <View style={styles.attachmentsArea}>
+          {task.photoUri && (
+            <Pressable
+              onPress={() => onPreviewPhoto?.(task.photoUri!)}
+              style={styles.photoWrapper}
+              accessibilityRole="imagebutton"
+              accessibilityLabel={`Ver foto de ${task.title}`}
+            >
+              <Image
+                source={{ uri: task.photoUri }}
+                style={styles.photoThumb}
+                resizeMode="cover"
+              />
+              {task.photoSizeKb !== undefined && (
+                <View style={styles.photoBadgeOverlay}>
+                  <MaterialCommunityIcons name="camera" size={11} color="#FFFDF8" />
+                  <Text style={styles.photoBadgeText}>{task.photoSizeKb} KB</Text>
+                </View>
+              )}
+            </Pressable>
+          )}
+
+          {locationLabel && (
+            <View style={styles.locationChip}>
+              <MaterialCommunityIcons
+                name="map-marker-outline"
+                size={14}
+                color={semanticColors.success}
+              />
+              <Text style={styles.locationChipText} numberOfLines={1}>
+                {locationLabel}
+              </Text>
+            </View>
+          )}
+        </View>
       )}
 
       <View style={styles.footerRow}>

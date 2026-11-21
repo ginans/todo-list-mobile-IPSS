@@ -4,10 +4,10 @@ import { paperPalette, semanticColors } from '../../../theme/app-theme';
 export const styles = StyleSheet.create({
   modalContainer: {
     backgroundColor: paperPalette.paperSheet,
-    marginHorizontal: 20,
+    marginHorizontal: 18,
     borderRadius: 20,
     padding: 20,
-    maxHeight: '85%',
+    maxHeight: '88%',
     borderWidth: 1,
     borderBottomWidth: 3,
     borderColor: semanticColors.border,
@@ -26,7 +26,7 @@ export const styles = StyleSheet.create({
   prioritySection: {
     marginVertical: 10,
   },
-  priorityLabel: {
+  sectionLabel: {
     fontSize: 13,
     fontWeight: '700',
     color: paperPalette.inkMedium,
@@ -56,6 +56,96 @@ export const styles = StyleSheet.create({
   },
   priorityButtonTextActive: {
     fontWeight: '800',
+  },
+  peripheralSection: {
+    marginTop: 8,
+    marginBottom: 6,
+  },
+  peripheralButtonsRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  peripheralButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    backgroundColor: paperPalette.paperMuted,
+    borderWidth: 1,
+    borderBottomWidth: 2,
+    borderColor: semanticColors.border,
+  },
+  peripheralButtonText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: paperPalette.inkDark,
+  },
+  photoPreviewCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: paperPalette.paperMuted,
+    borderRadius: 12,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: semanticColors.border,
+    gap: 10,
+  },
+  photoPreviewThumb: {
+    width: 60,
+    height: 60,
+    borderRadius: 10,
+    backgroundColor: paperPalette.paperLines,
+  },
+  photoPreviewMeta: {
+    flex: 1,
+  },
+  photoPreviewTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: paperPalette.inkDark,
+  },
+  photoPreviewSub: {
+    fontSize: 11,
+    color: semanticColors.mutedText,
+    marginTop: 2,
+  },
+  removeChipBtn: {
+    padding: 6,
+  },
+  locationCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: semanticColors.successLight,
+    borderRadius: 12,
+    paddingVertical: 9,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#C8DEC9',
+    gap: 8,
+  },
+  locationMeta: {
+    flex: 1,
+  },
+  locationAddress: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: paperPalette.inkDark,
+  },
+  locationCoords: {
+    fontSize: 11,
+    color: semanticColors.success,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  peripheralError: {
+    fontSize: 12,
+    color: semanticColors.danger,
+    marginTop: 6,
+    fontWeight: '600',
   },
   actionsContainer: {
     flexDirection: 'row',

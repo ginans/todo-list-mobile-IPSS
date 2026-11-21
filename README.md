@@ -1,104 +1,89 @@
-# Mis Tareas — Aplicación Móvil de Gestión de Pendientes (To-Do List)
+# Mis Tareas — Aplicación Móvil con Periféricos Nativos
 
-Aplicación móvil multiplataforma orientada a la organización y seguimiento de tareas diarias (*To-Do List*), construida bajo una arquitectura desacoplada por capas, persistencia local asíncrona y una identidad visual inspirada en cuadernos de notas físicos (*Paper & Ink Notebook*). Desarrollada con fines académicos para el **Instituto Profesional San Sebastián (IPSS)** como entrega de la **Evaluación Sumativa Unidad N° 1** de la asignatura **Desarrollo de Aplicaciones Móviles — Sección 51**.
+Aplicación móvil multiplataforma de gestión de tareas con estética *"Paper & Ink Notebook"*, construida sobre una arquitectura desacoplada por capas en **React Native, Expo y TypeScript**. Integra periféricos internos del dispositivo como cámara, galería, geolocalización GPS y autenticación biométrica, junto con gestión segura de permisos, almacenamiento local offline aislado por perfil y pruebas automatizadas con **Jest** y **Playwright**.
+
+Desarrollada para el **Instituto Profesional San Sebastián** como entrega de la **Evaluación Sumativa — Unidad N° 2** de la asignatura **Desarrollo de Aplicaciones Móviles — Sección 51**.
 
 | | |
 | :--- | :--- |
 | **Desarrolladora** | Gina Norambuena Sánchez |
 | **Docente** | Boris Belmar |
 | **Asignatura** | Desarrollo de Aplicaciones Móviles — Sección 51 |
-| **Institución** | Instituto Profesional San Sebastián (IPSS) |
-| **Evaluación** | Evaluación Sumativa Unidad N° 1 |
+| **Institución** | Instituto Profesional San Sebastián |
+| **Evaluación** | Evaluación Sumativa — Unidad N° 2 |
 
 ---
 
 ## Tabla de contenidos
 
-- [Mis Tareas — Aplicación Móvil de Gestión de Pendientes (To-Do List)](#mis-tareas--aplicación-móvil-de-gestión-de-pendientes-to-do-list)
-  - [Tabla de contenidos](#tabla-de-contenidos)
-  - [Características](#características)
-  - [Tecnologías y Justificación del Stack](#tecnologías-y-justificación-del-stack)
-  - [Requisitos](#requisitos)
-  - [Puesta en marcha](#puesta-en-marcha)
-    - [1. Clonar el repositorio e instalar dependencias](#1-clonar-el-repositorio-e-instalar-dependencias)
-    - [2. Configurar variables de entorno](#2-configurar-variables-de-entorno)
-    - [3. Instalar EAS CLI, iniciar sesión y levantar el servidor](#3-instalar-eas-cli-iniciar-sesión-y-levantar-el-servidor)
-    - [4. Abrir la aplicación en el teléfono o navegador](#4-abrir-la-aplicación-en-el-teléfono-o-navegador)
-  - [Comandos útiles](#comandos-útiles)
-  - [Variables de entorno](#variables-de-entorno)
-  - [Arquitectura de la Aplicación](#arquitectura-de-la-aplicación)
-    - [Funcionamiento Nativo en React Native](#funcionamiento-nativo-en-react-native)
-    - [Estructura de Directorios](#estructura-de-directorios)
-    - [Diagrama de Arquitectura por Capas](#diagrama-de-arquitectura-por-capas)
-    - [Diagrama de Flujo Funcional](#diagrama-de-flujo-funcional)
-  - [Patrones de Diseño y Decisiones Arquitectónicas](#patrones-de-diseño-y-decisiones-arquitectónicas)
-    - [1. Adapter Pattern (`ITaskRepository`, `TaskStorageAdapter`, `TaskHttpAdapter`)](#1-adapter-pattern-itaskrepository-taskstorageadapter-taskhttpadapter)
-    - [2. Factory \& Singleton Pattern (`TaskAdapterFactory`)](#2-factory--singleton-pattern-taskadapterfactory)
-    - [3. Container / Presenter Pattern (`useTasks` Custom Hook)](#3-container--presenter-pattern-usetasks-custom-hook)
-    - [4. Componentes Atómicos Reutilizables (`src/components/ui/`)](#4-componentes-atómicos-reutilizables-srccomponentsui)
-    - [5. Separación Estricta de Contratos y Hojas de Estilo](#5-separación-estricta-de-contratos-y-hojas-de-estilo)
-    - [Balance Arquitectónico (Trade-offs)](#balance-arquitectónico-trade-offs)
-  - [Estrategia UX/UI: Estética *"Paper \& Ink Notebook"*](#estrategia-uxui-estética-paper--ink-notebook)
-  - [Vistas y Flujo del Sistema](#vistas-y-flujo-del-sistema)
-    - [1. Estado Inicial y Creación de Tareas](#1-estado-inicial-y-creación-de-tareas)
-    - [2. Panel de Progreso, Prioridades y Tachado de Completadas](#2-panel-de-progreso-prioridades-y-tachado-de-completadas)
-    - [3. Edición de Tareas y Eliminación con Confirmación](#3-edición-de-tareas-y-eliminación-con-confirmación)
-    - [4. Filtros por Estado y Búsqueda en Tiempo Real](#4-filtros-por-estado-y-búsqueda-en-tiempo-real)
-  - [Nota sobre el proceso de desarrollo](#nota-sobre-el-proceso-de-desarrollo)
+- [Características](#características)
+- [Tecnologías y Stack Nativo](#tecnologías-y-stack-nativo)
+- [Requisitos](#requisitos)
+- [Puesta en marcha](#puesta-en-marcha)
+  - [1. Clonar el repositorio e instalar dependencias](#1-clonar-el-repositorio-e-instalar-dependencias)
+  - [2. Configurar variables de entorno](#2-configurar-variables-de-entorno)
+  - [3. Levantar el servidor de desarrollo](#3-levantar-el-servidor-de-desarrollo)
+- [Comandos útiles](#comandos-útiles)
+- [Variables de entorno](#variables-de-entorno)
+- [Arquitectura de la Aplicación](#arquitectura-de-la-aplicación)
+  - [Estructura de Directorios](#estructura-de-directorios)
+  - [Diagrama de Capas y Periféricos](#diagrama-de-capas-y-periféricos)
+- [Implementación de Periféricos](#implementación-de-periféricos)
+  - [1. Cámara y Galería](#1-cámara-y-galería)
+  - [2. Geolocalización GPS](#2-geolocalización-gps)
+  - [3. Autenticación Biométrica](#3-autenticación-biométrica)
+- [Gestión de Permisos, Seguridad y Almacenamiento Local](#gestión-de-permisos-seguridad-y-almacenamiento-local)
+  - [Permisos Declarativos y Solicitud Just-In-Time](#permisos-declarativos-y-solicitud-just-in-time)
+  - [Seguridad y Privacidad Multi-Perfil](#seguridad-y-privacidad-multi-perfil)
+  - [Almacenamiento Local Offline](#almacenamiento-local-offline)
+- [Pruebas de Funcionalidad, Fiabilidad y Precisión](#pruebas-de-funcionalidad-fiabilidad-y-precisión)
+  - [Pruebas Unitarias y Cobertura con Jest](#pruebas-unitarias-y-cobertura-con-jest)
+  - [Pruebas End-to-End con Playwright](#pruebas-end-to-end-con-playwright)
+- [Evidencia Visual](#evidencia-visual)
+  - [Flujo Principal en Aplicación](#flujo-principal-en-aplicación)
+  - [Evidencia en Dispositivo Físico](#evidencia-en-dispositivo-físico)
 
 ---
 
 ## Características
 
-- **Ciclo CRUD Completo de Tareas:**
-  - Registro de tareas con **título obligatorio** (validado en tiempo real), **descripción opcional** y selector de **prioridad** (`Baja`, `Media`, `Alta`).
-  - Edición interactiva precargando los datos actuales de la tarea seleccionada.
-  - Marcado y desmarcado instantáneo de estado (`Pendiente` / `Completada`) con tachado reactivo tanto en el título como en la descripción.
-  - Eliminación protegida mediante diálogo modal de confirmación (`AppConfirmDialog`) para evitar borrados accidentales.
-- **Panel de Progreso General Reactivo:**
-  - Barra de avance porcentual dinámica que cambia a verde salvia al alcanzar el `100%` de cumplimiento.
-  - Tres cajas contadoras integradas bajo la barra de progreso: **Totales** (tinta/café), **Pendientes** (ámbar/ocre) y **Completadas** (verde salvia).
-- **Búsqueda y Filtrado Instantáneo:**
-  - Buscador en tiempo real por coincidencias de texto en título o descripción.
-  - Pestañas de filtro (`Todas`, `Pendientes`, `Hechas`) con íconos vectoriales y bordes con relieve.
-- **Persistencia Local con `AsyncStorage` y Feature Flag:**
-  - En esta primera unidad, las tareas se almacenan de forma persistente en el dispositivo mediante `TaskStorageAdapter` (`@react-native-async-storage/async-storage`), iniciando con una lista limpia (`0` tareas).
-  - La capa de infraestructura ya incluye `TaskHttpAdapter` controlado por la variable `EXPO_PUBLIC_DEMO_MODE`, dejando la aplicación lista para conectarse a un backend REST API en las siguientes unidades sin tocar la interfaz.
-- **Sistema de Diseño *"Paper & Ink Notebook"*:**
-  - Lienzo con textura orgánica de papel algodón (`assets/paper-texture.png`), paleta cálida de papelería (`#F4EFE6`, `#FFFDF8`) y tinta espresso (`#2C221E`), junto con coherencia cromática entre los botones del formulario y las insignias (`AppBadge`) del dashboard.
+- **Gestión completa de tareas:** Creación, edición, completado con barra de progreso reactiva, eliminación con diálogo de confirmación, filtros por estado `Todas`, `Pendientes` y `Hechas`, y búsqueda en tiempo real por título, descripción o dirección GPS.
+- **Captura fotográfica y galería:** Toma directa de fotografías con la cámara nativa o selección desde galería, optimización automática a JPEG hasta `1080px` de ancho, visualización del nombre real del archivo, vista previa ampliada y limpieza automática de archivos descartados.
+- **Geolocalización GPS:** Registro de coordenadas de latitud y longitud, precisión estimada en metros, resolución de dirección legible mediante geocodificación inversa y continuidad total sin conexión a internet.
+- **Autenticación local multi-perfil con PIN y biometría:** Perfiles independientes protegidos mediante PIN de 4 dígitos con `SHA-256` y `SecureStore`, desbloqueo biométrico por Huella Digital o Face ID exclusivo para el propietario principal del dispositivo, y bloqueo temporal tras intentos fallidos.
+- **Operación 100% offline:** Persistencia local aislada por usuario mediante `AsyncStorage` y `expo-file-system`, sin dependencia de servicios web externos.
 
 ---
 
-## Tecnologías y Justificación del Stack
+## Tecnologías y Stack Nativo
 
-Se seleccionó **React Native con Expo y TypeScript** por cuatro motivos técnicos:
+El proyecto evoluciona sobre la base técnica en **React Native, Expo SDK 58 y TypeScript**, accediendo directamente a los periféricos internos del dispositivo mediante módulos oficiales de Expo:
 
-1. **Renderizado Nativo Real frente a WebViews:** A diferencia de frameworks híbridos basados en *WebView*, React Native traduce los componentes en vistas nativas reales del sistema operativo (`android.view.View` en Android y `UIView` en iOS), logrando 60 FPS y respuesta táctil nativa.
-2. **Tipado Estático Estricto:** El uso de TypeScript permite modelar contratos de dominio claros (`interfaces`, `types`, `enums`) y detectar errores antes de ejecutar la aplicación en el teléfono.
-3. **Entorno de Desarrollo Multiplataforma con Expo SDK 58:** Permite compilar y probar en tiempo real directamente en dispositivos físicos mediante **Expo Go** (y en paralelo en navegador web o tablet) sin requerir instalaciones pesadas para el flujo diario de desarrollo.
-4. **Evolución hacia Unidades 2 y 3:** La asignatura contempla escalar este proyecto hacia autenticación y consumo de APIs REST. Contar con React Native + TypeScript permite dejar preparada la capa de adaptadores HTTP desde la primera entrega.
-
-| Dependencia | Versión | Propósito y Justificación de Elección |
-| :--- | :---: | :--- |
-| **`expo`** | `~58.0.21` | SDK y CLI local (`npx expo`) que gestiona Metro Bundler, carga de recursos gráficos, variables `EXPO_PUBLIC_*` y vinculación con Expo Go. |
-| **`react-native`** | `0.88.1` | Framework móvil nativo con soporte para la Nueva Arquitectura (motor Hermes y comunicación vía JSI). |
-| **`react`** | `19.3.0` | Biblioteca declarativa de interfaz y manejo de estado reactivo mediante Hooks. |
-| **`typescript`** | `~6.0.3` | Tipado estático estricto para contratos de dominio, adaptadores y propiedades de componentes. |
-| **`react-native-paper`** | `^5.15.3` | Primitivas accesibles de Material Design 3 (`Modal`, `Portal`, `Snackbar`, `TextInput`, `Surface`, `FAB`) utilizadas como base interna de nuestra capa `src/components/ui/`. |
-| **`@react-native-async-storage/async-storage`** | `2.2.0` | Almacenamiento clave-valor asíncrono y persistente en el teléfono. Se eligió para conservar las tareas localmente en la Unidad 1 a través de `TaskStorageAdapter`. |
-| **`@expo/vector-icons`** | `^15.0.2` | Iconografía vectorial (`MaterialCommunityIcons`) para filtros, buscador y controles de acción. |
-| **`react-native-safe-area-context`** | `~5.10.1` | Cálculo automático de zonas seguras del hardware (cámara frontal, barra de estado y barra inferior de gestos). |
-| **`react-native-screens`** | `~4.30.0` | Optimización de contenedores nativos de pantalla en memoria. |
-| **`react-native-web` & `react-dom`** | `^0.21.4` | Renderizado compatible en navegador web para pruebas rápidas de diseño responsivo. |
+| Dependencia | Versión | Periférico / Responsabilidad | Archivo Principal |
+| :--- | :---: | :--- | :--- |
+| **`expo`** | `~58.0.21` | Runtime nativo, config plugins y CLI multiplataforma. | `app.json` |
+| **`react-native`** | `0.88.1` | Renderizado nativo Android e iOS sobre motor Hermes. | `App.tsx` |
+| **`typescript`** | `~6.0.3` | Tipado estático estricto separado entre código fuente y pruebas. | `tsconfig.json` |
+| **`expo-image-picker`** | `~58.0.10` | Acceso a cámara nativa y galería del dispositivo. | `src/infra/device/camera.service.ts` |
+| **`expo-image-manipulator`** | `~58.0.16` | Redimensionamiento hasta `1080px` y compresión JPEG al 70%. | `src/infra/device/camera.service.ts` |
+| **`expo-file-system`** | `~58.0.14` | Persistencia física en `Paths.document/task-photos/` y limpieza local. | `src/infra/device/camera.service.ts` |
+| **`expo-location`** | `~58.0.22` | Lectura GPS, verificación de servicio y geocodificación inversa. | `src/infra/device/location.service.ts` |
+| **`expo-local-authentication`** | `~58.0.3` | Sensor biométrico para Huella Digital, Face ID, rostro e iris. | `src/infra/device/biometric.service.ts` |
+| **`expo-secure-store`** | `~58.0.3` | Almacenamiento cifrado de credenciales en Keychain y Keystore. | `src/infra/storage/profile-storage.adapter.ts` |
+| **`expo-crypto`** | `~58.0.8` | Hashing criptográfico `SHA-256` para PINs de usuario. | `src/infra/storage/profile-storage.adapter.ts` |
+| **`@react-native-async-storage/async-storage`** | `2.2.0` | Persistencia local clave-valor aislada por perfil. | `src/infra/storage/task-storage.adapter.ts` |
+| **`react-native-paper`** | `^5.15.3` | Primitivas Material 3 para modales, diálogos, `Snackbar` y `FAB`. | `src/components/ui/` |
+| **`jest` + `ts-jest`** | `^30.5.2` | Pruebas unitarias y reporte de cobertura sobre servicios nativos. | `src/__tests__/` |
+| **`@playwright/test`** | `^1.65.1` | Pruebas End-to-End en viewport móvil `412×915`. | `e2e/todo-peripherals.spec.ts` |
 
 ---
 
 ## Requisitos
 
-- **Node.js 20+** o **Node.js 22+** *(Node.js 18 no se utiliza por encontrarse deprecado)*
-- **npm** (incluido con Node.js)
-- **EAS CLI (`eas-cli`)** instalado globalmente (`npm install -g eas-cli`)
-- **Cuenta gratuita en [Expo](https://expo.dev/)** y aplicación **Expo Go** instalada en el teléfono desde Google Play Store o App Store.
+- **Node.js 22 LTS o superior**
+- **Gestor de paquetes JavaScript** como `npm`, `pnpm`, `yarn` o `bun`
+- **Expo Go** instalado en un dispositivo físico Android o iOS para probar cámara nativa, GPS real y biometría
+- **Google Chrome** o navegadores de Playwright instalados con `npx playwright install chromium` para ejecutar la suite E2E
 
 ---
 
@@ -114,34 +99,21 @@ npm install
 
 ### 2. Configurar variables de entorno
 
-Crear el archivo `.env` en la raíz del proyecto a partir de `.env.example`:
+Crear el archivo `.env` en la raíz a partir de `.env.example`:
 
 ```bash
 cp .env.example .env
 ```
 
-```env
-EXPO_PUBLIC_DEMO_MODE=true
-EXPO_PUBLIC_API_URL=http://localhost:3000/api
-EXPO_PUBLIC_APP_ENV=development
-```
-
-### 3. Instalar EAS CLI, iniciar sesión y levantar el servidor
-
-Si aún no tienes **EAS CLI** instalado globalmente, instálalo e inicia sesión con tu cuenta de Expo (la misma cuenta activa en la app **Expo Go** del teléfono). Luego, inicia el servidor de desarrollo:
+### 3. Levantar el servidor de desarrollo
 
 ```bash
-npm install -g eas-cli
-eas login
+# Modo móvil para escanear con Expo Go en Android o iOS
 npm start
+
+# Modo navegador web responsivo
+npm run web
 ```
-
-> **Nota:** Al autenticarse mediante `eas login`, tu sesión de Expo queda vinculada con **Expo Go** en el teléfono y `npm start` (`npx expo start`) genera el código QR interactivo en la terminal. Si la red Wi-Fi bloquea conexiones locales entre dispositivos, puedes iniciar en modo túnel ejecutando `npx expo start --tunnel`. Para más información sobre la configuración de **EAS CLI** y distribución en dispositivos, consultar la [documentación oficial de Expo](https://docs.expo.dev/develop/development-builds/share-with-your-team/).
-
-### 4. Abrir la aplicación en el teléfono o navegador
-
-- **En Dispositivo Móvil (Expo Go):** Abre la app **Expo Go** en tu smartphone (donde aparecerá el servidor activo bajo tu cuenta de Expo) o escanea directamente el código QR de la terminal.
-- **En Navegador Web:** Presiona la tecla `w` en la terminal o ejecuta `npm run web` (`http://localhost:8081`).
 
 ---
 
@@ -149,262 +121,216 @@ npm start
 
 | Comando | Descripción |
 | :--- | :--- |
-| `npm install -g eas-cli` | Instala globalmente la herramienta de línea de comandos de Expo Application Services (EAS) |
-| `eas login` | Inicia sesión en la cuenta de Expo desde la terminal para vincular dispositivos |
-| `eas whoami` | Verifica el usuario de Expo actualmente autenticado en la terminal |
-| `npm start` | Levanta el servidor de desarrollo de Expo y genera el código QR |
-| `npx expo start -c` | Inicia el servidor limpiando la caché de Metro Bundler |
-| `npx expo start --tunnel` | Inicia el servidor usando túnel remoto (útil en redes con firewall) |
-| `npm run android` | Ejecuta la aplicación en emulador o teléfono Android conectado por USB |
-| `npm run web` | Ejecuta la versión web en `http://localhost:8081` |
-| `npx tsc --noEmit` | Verifica el tipado de TypeScript en todo el proyecto sin emitir archivos |
+| `npm start` | Inicia Metro Bundler para ejecutar la aplicación en dispositivo físico con Expo Go. |
+| `npm run android` | Inicia el proyecto apuntando a un dispositivo o emulador Android. |
+| `npm run ios` | Inicia el proyecto apuntando a un simulador iOS. |
+| `npm run web` | Levanta la versión web en `http://localhost:8081`. |
+| `npm run typecheck` | Valida tipos TypeScript tanto en la aplicación como en las pruebas automatizadas. |
+| `npm test` | Ejecuta las 4 suites unitarias con Jest y sus 42 casos de prueba. |
+| `npm run test:coverage` | Ejecuta las pruebas unitarias generando la tabla de cobertura por módulo. |
+| `npm run test:e2e` | Ejecuta la batería End-to-End en Playwright con 4 escenarios móviles. |
 
 ---
 
 ## Variables de entorno
 
-Las variables prefijadas con `EXPO_PUBLIC_` son leídas de forma centralizada en `src/config/env.config.ts`:
-
 | Variable | Valor por defecto | Descripción |
 | :--- | :---: | :--- |
-| `EXPO_PUBLIC_DEMO_MODE` | `true` | **Feature Flag de datos:** `true` utiliza `TaskStorageAdapter` (`AsyncStorage` local); `false` activa `TaskHttpAdapter` (API REST). |
-| `EXPO_PUBLIC_API_URL` | `http://localhost:3000/api` | URL base del servicio backend para las siguientes unidades. |
-| `EXPO_PUBLIC_APP_ENV` | `development` | Entorno de ejecución actual (`development` \| `production`). |
+| `EXPO_PUBLIC_DATA_SOURCE` | `local` | Define el origen de datos. En esta etapa opera exclusivamente en modo local. |
+| `EXPO_PUBLIC_API_URL` | `http://localhost:3000/api` | URL base reservada para `TaskHttpAdapter`, mantenido desacoplado bajo el Principio Abierto/Cerrado para futuras integraciones REST. |
+| `EXPO_PUBLIC_APP_ENV` | `development` | Identificador del entorno de ejecución. |
 
 ---
 
 ## Arquitectura de la Aplicación
 
-### Funcionamiento Nativo en React Native
-
-La aplicación aprovecha la **Nueva Arquitectura de React Native** (`"newArchEnabled": true` en `app.json`), dividiendo el trabajo en dos planos comunicados por **JSI (JavaScript Interface)**:
-- **Capa JavaScript (Hermes Engine):** Ejecuta la lógica de negocio en TypeScript, el hook `useTasks` y la persistencia asíncrona en `AsyncStorage`.
-- **Capa Nativa (Host Platform):** Renderiza los componentes fundamentales del proyecto en vistas reales del sistema:
-  - **`FlatList`:** Virtualiza el listado de tareas mediante *windowing*, manteniendo en memoria únicamente las tarjetas visibles en pantalla.
-  - **`ImageBackground`:** Renderiza la textura de papel algodón (`assets/paper-texture.png`) a pantalla completa.
-  - **`KeyboardAvoidingView` & `SafeAreaView`:** Ajustan automáticamente la interfaz cuando se despliega el teclado virtual (como se aprecia al escribir una tarea) y respetan los márgenes de cámara y barra de estado.
-  - **`Portal` & `Modal`:** Elevan los diálogos flotantes por encima del árbol principal de vistas.
+El diseño separa los contratos de dominio en `src/core/`, los servicios de hardware y persistencia en `src/infra/`, la gestión de estado reactivo en `src/hooks/` y la interfaz en `src/components/`.
 
 ### Estructura de Directorios
 
 ```text
 todo-list-mobile-ipss/
-├── assets/
-│   └── paper-texture.png                 # Textura orgánica de papel algodón
-├── screenshots/                          # Capturas de pantalla reales en dispositivo móvil
-├── src/
-│   ├── config/
-│   │   └── env.config.ts                 # Lectura tipada de variables de entorno
-│   ├── core/                             # Capa de Dominio (Contratos desacoplados)
-│   │   └── task/
-│   │       ├── enums/                    #   task-priority.enum.ts, task-status.enum.ts
-│   │       ├── interfaces/               #   task.interface.ts, task-filter.interface.ts, task-repository.interface.ts
-│   │       └── types/                    #   create-task.type.ts, update-task.type.ts
-│   ├── infra/                            # Capa de Infraestructura y Persistencia
-│   │   └── api/
-│   │       ├── adapters/
-│   │       │   ├── task-storage.adapter.ts # Persistencia local en AsyncStorage (@todo_tasks_v2)
-│   │       │   └── task-http.adapter.ts    # Cliente HTTP fetch preparado para Unidad 2
-│   │       └── factories/
-│   │           └── task-adapter.factory.ts # Selección de adaptador según Feature Flag
-│   ├── components/                       # Capa de Presentación
-│   │   ├── ui/                           #   Primitivos reutilizables (AppBadge, AppButton, AppCard, AppConfirmDialog, AppInput)
-│   │   │   └── styles/                   #     Hojas de estilo atómicas (*.styles.ts)
-│   │   └── tasks/                        #   Componentes de negocio (TaskHeader, TaskFilterTabs, TaskItem, TaskFormModal, TaskEmptyState)
-│   │       └── styles/                   #     Hojas de estilo de dominio (*.styles.ts)
-│   ├── hooks/
-│   │   └── useTasks.ts                   # Custom Hook de estado CRUD, búsqueda, filtros y métricas
-│   ├── styles/
-│   │   └── app.styles.ts                 # Estilos globales de pantalla y botón flotante (FAB)
-│   └── theme/
-│       └── app-theme.ts                  # Paleta "Paper & Ink" y tokens semánticos
-├── .env.example                          # Plantilla de variables de entorno
-├── App.tsx                               # Punto de entrada principal
-├── app.json                              # Configuración de Expo
-└── package.json                          # Dependencias y scripts
+├── App.tsx                                    # Orquestador principal, vistas y modales
+├── app.json                                   # Permisos nativos Android/iOS y config plugins
+├── jest.config.js                             # Configuración de pruebas unitarias con ts-jest
+├── playwright.config.ts                       # Configuración E2E en viewport móvil 412x915
+├── tsconfig.json / tsconfig.test.json         # Tipado estricto separado entre app y pruebas
+├── e2e/
+│   └── todo-peripherals.spec.ts               # Flujos E2E de foto, GPS, PIN y multi-perfil
+├── screenshots/
+│   └── u2/                                    # Capturas de evidencia Unidad N° 2
+└── src/
+    ├── config/env.config.ts                   # Lectura tipada de variables EXPO_PUBLIC_*
+    ├── constants/messages.constants.ts        # Mensajes centralizados de auth, periféricos y CRUD
+    ├── core/                                  # Contratos puros: interfaces, enums y types
+    │   ├── auth/
+    │   ├── device/
+    │   └── task/
+    ├── hooks/
+    │   ├── useAuthProfiles.ts                 # Ciclo de perfiles, PIN y biometría
+    │   └── useTasks.ts                        # CRUD reactivo, filtros, búsqueda y métricas
+    ├── infra/
+    │   ├── device/
+    │   │   ├── biometric.service.ts           # Huella Digital, Face ID y Reconocimiento Facial
+    │   │   ├── camera.service.ts              # Cámara, galería, compresión JPEG y FileSystem
+    │   │   └── location.service.ts            # GPS, validación de rangos y geocodificación
+    │   ├── storage/
+    │   │   ├── profile-storage.adapter.ts     # SHA-256, SecureStore, rate limit y borrado en cascada
+    │   │   └── task-storage.adapter.ts        # Persistencia local aislada por perfil
+    │   └── api/
+    │       ├── adapters/task-http.adapter.ts  # Adaptador HTTP reservado para futuras iteraciones
+    │       └── factories/task-adapter.factory.ts
+    ├── components/
+    │   ├── auth/                              # ProfileAuthScreen y ProfileSettingsModal
+    │   ├── tasks/                             # TaskHeader, TaskFilterTabs, TaskItem y TaskFormModal
+    │   └── ui/                                # AppButton, AppCard, AppInput y AppPermissionDialog
+    └── __tests__/                             # 4 suites unitarias Jest con 42 casos de prueba
 ```
 
-### Diagrama de Arquitectura por Capas
-
-```mermaid
-flowchart LR
-    subgraph UI ["Capa de Presentación (UI)"]
-        App["App.tsx"]
-        TaskComp["Componentes de Dominio (tasks/)"]
-        AtomicUI["Componentes Reutilizables (ui/)"]
-        Hook["useTasks (Custom Hook)"]
-    end
-
-    subgraph Core ["Capa Core (Dominio)"]
-        Contract["ITaskRepository (Interface)"]
-        Models["ITask / Enums / Types"]
-    end
-
-    subgraph Infra ["Capa de Infraestructura"]
-        Factory["TaskAdapterFactory"]
-        Storage["TaskStorageAdapter (AsyncStorage)"]
-        Http["TaskHttpAdapter (REST API fetch)"]
-    end
-
-    App --> TaskComp
-    TaskComp --> AtomicUI
-    App --> Hook
-    Hook --> Contract
-    Hook --> Factory
-    Factory -->|"EXPO_PUBLIC_DEMO_MODE = true"| Storage
-    Factory -->|"EXPO_PUBLIC_DEMO_MODE = false"| Http
-    Storage -.->|"implementa"| Contract
-    Http -.->|"implementa"| Contract
-```
-
-### Diagrama de Flujo Funcional
+### Diagrama de Capas y Periféricos
 
 ```mermaid
 flowchart TD
-    Start(["Inicio de la Aplicación"]) --> Load["useTasks invoca repository.getAll()"]
-    Load --> ReadStorage["TaskStorageAdapter consulta @todo_tasks_v2 en AsyncStorage"]
-    ReadStorage --> HasTasks{"¿Existen tareas registradas?"}
+    subgraph UI["Capa de Presentación"]
+        direction LR
+        UI1["ProfileAuthScreen"]
+        UI2["TaskFormModal"]
+        UI3["AppPermissionDialog"]
+    end
 
-    HasTasks -- "No (0 tareas)" --> EmptyState["Muestra TaskEmptyState ('+ Crear Primera Tarea')"]
-    HasTasks -- "Sí" --> RenderList["Renderiza FlatList con tarjetas TaskItem y progreso"]
+    subgraph APP["Capa de Estado y Dominio"]
+        direction LR
+        AP1["useAuthProfiles"]
+        AP2["useTasks"]
+        AP3["Contratos src/core"]
+    end
 
-    EmptyState --> OpenModal["Abre TaskFormModal"]
-    RenderList --> UserAction{"Acción del usuario"}
+    subgraph INFRA["Capa de Infraestructura"]
+        direction LR
+        IN1["Periféricos: Cámara, GPS y Biometría"]
+        IN2["Persistencia: Perfiles y Tareas"]
+    end
 
-    UserAction -- "Crear / Editar" --> OpenModal
-    OpenModal --> Validate{"¿Título válido (>= 3 caracteres)?"}
-    Validate -- "No" --> ShowError["Muestra error en AppInput"]
-    Validate -- "Sí" --> SaveTask["Persiste en AsyncStorage y actualiza estado"]
+    subgraph DEVICE["API Interna del Dispositivo"]
+        direction LR
+        DV1["ImagePicker, Location y LocalAuth"]
+        DV2["FileSystem, SecureStore y AsyncStorage"]
+    end
 
-    UserAction -- "Marcar Checkbox" --> ToggleStatus["Alterna PENDING / COMPLETED y aplica tachado"]
-    UserAction -- "Eliminar (Papelera)" --> ConfirmModal["Abre AppConfirmDialog"]
-    ConfirmModal -- "Confirma eliminación" --> DeleteTask["Elimina tarea de AsyncStorage"]
-
-    SaveTask --> Feedback["Muestra Snackbar y recalcula barra de progreso"]
-    ToggleStatus --> Feedback
-    DeleteTask --> Feedback
-    Feedback --> RenderList
+    UI --> APP
+    APP --> INFRA
+    IN1 --> DV1
+    IN2 --> DV2
 ```
 
 ---
 
-## Patrones de Diseño y Decisiones Arquitectónicas
+## Implementación de Periféricos
 
-### 1. Adapter Pattern (`ITaskRepository`, `TaskStorageAdapter`, `TaskHttpAdapter`)
+### 1. Cámara y Galería
 
-Para desacoplar la interfaz móvil del mecanismo de almacenamiento, se definió el contrato `ITaskRepository` en `src/core/task/interfaces/task-repository.interface.ts`:
+Implementado en [`src/infra/device/camera.service.ts`](./src/infra/device/camera.service.ts) e integrado en [`src/components/tasks/TaskFormModal.tsx`](./src/components/tasks/TaskFormModal.tsx):
 
-```typescript
-export interface ITaskRepository {
-  getAll(): Promise<ITask[]>;
-  getById(id: string): Promise<ITask | null>;
-  create(input: CreateTaskInput): Promise<ITask>;
-  update(id: string, input: UpdateTaskInput): Promise<ITask>;
-  delete(id: string): Promise<boolean>;
-}
-```
+- **Captura nativa y galería:** Soporta toma directa con cámara mediante `captureFromCamera` y selección desde galería mediante `pickFromGallery`, conservando el nombre real del archivo o generando un identificador legible con fecha y hora como `Foto_20-11_21-40.jpg` para capturas de cámara.
+- **Optimización y límite de tamaño:** Valida que el archivo de entrada no supere `15 MB` antes de decodificarlo para proteger la memoria del dispositivo; luego procesa cada fotografía con `expo-image-manipulator`, redimensionando proporcionalmente hasta un máximo de `1080px` de ancho sin alterar imágenes más pequeñas y aplicando compresión JPEG al 70% para reducir el peso en almacenamiento.
+- **Persistencia y limpieza local:** En Android e iOS las imágenes se guardan en el directorio administrado `Paths.document/task-photos/` y se eliminan automáticamente al descartar la selección, reemplazar la foto, eliminar una tarea o borrar un perfil. En Web se persisten en formato `data:image/jpeg;base64`.
 
-- **`TaskStorageAdapter` (Activo actualmente):** Implementa la persistencia local usando `AsyncStorage` bajo la clave `@todo_tasks_v2`. Inicia con una colección vacía (`[]`) y guarda cada cambio en el teléfono.
-- **`TaskHttpAdapter` (Preparado para Unidad 2):** Implementa el mismo contrato mediante peticiones `fetch` (`GET`, `POST`, `PATCH`, `DELETE`) hacia un servidor REST.
+### 2. Geolocalización GPS
 
-### 2. Factory & Singleton Pattern (`TaskAdapterFactory`)
+Implementado en [`src/infra/device/location.service.ts`](./src/infra/device/location.service.ts):
 
-Resuelve dinámicamente qué adaptador entregar al hook `useTasks` según el valor de `envConfig.isDemoMode`, manteniendo una única instancia en memoria durante la ejecución:
+- **Verificación de servicio activo:** Antes de consultar coordenadas en dispositivos nativos, valida con `Location.hasServicesEnabledAsync()` que el servicio de ubicación del sistema se encuentre habilitado.
+- **Obtención ágil de coordenadas:** Prioriza lecturas recientes en caché del sistema de hasta 2 minutos y precisión de hasta `200 m` para responder de forma inmediata; si no existe una fijación reciente, solicita posición activa con `Accuracy.Balanced`, límite de 5 segundos y fallback controlado, permitiendo continuar editando el formulario mientras se resuelve la ubicación.
+- **Validación de precisión y soporte offline:** `isValidCoordinates()` verifica rangos geográficos válidos de `-90` a `90` en latitud y `-180` a `180` en longitud, descartando lecturas inválidas. Registra la precisión estimada en metros y resuelve una dirección legible mediante `reverseGeocodeAsync()`, conservando las coordenadas formateadas a 4 decimales cuando el dispositivo opera sin conexión.
 
-```typescript
-export class TaskAdapterFactory {
-  private static instance: ITaskRepository | null = null;
+### 3. Autenticación Biométrica
 
-  public static getRepository(): ITaskRepository {
-    if (!TaskAdapterFactory.instance) {
-      if (envConfig.isDemoMode) {
-        TaskAdapterFactory.instance = new TaskStorageAdapter();
-      } else {
-        TaskAdapterFactory.instance = new TaskHttpAdapter(envConfig.apiUrl);
-      }
-    }
-    return TaskAdapterFactory.instance;
-  }
-}
-```
+Implementado en [`src/infra/device/biometric.service.ts`](./src/infra/device/biometric.service.ts):
 
-### 3. Container / Presenter Pattern (`useTasks` Custom Hook)
-
-El hook `src/hooks/useTasks.ts` centraliza las operaciones CRUD, el estado de carga, la búsqueda por texto, el filtro por estado y el cálculo de métricas (`total`, `pending`, `completed`, `progress`), manteniendo a los componentes visuales libres de lógica de persistencia.
-
-### 4. Componentes Atómicos Reutilizables (`src/components/ui/`)
-
-Siguiendo la filosofía de sistemas como `shadcn/ui`, las primitivas de `react-native-paper` se encapsularon en componentes propios (`AppCard`, `AppButton`, `AppInput`, `AppBadge`, `AppConfirmDialog`). Esto evita acoplar las pantallas a una librería externa y centraliza los estilos del tema en un solo lugar.
-
-### 5. Separación Estricta de Contratos y Hojas de Estilo
-
-- **Modelos separados por tipo de artefacto:** Las enumeraciones se ubican en `enums/*.enum.ts`, las interfaces en `interfaces/*.interface.ts` y los tipos de entrada en `types/*.type.ts`.
-- **Carpetas `styles/` dedicadas:** Todos los bloques `StyleSheet.create` están extraídos en archivos `*.styles.ts` dentro de su carpeta `styles/` correspondiente, logrando componentes JSX breves y legibles.
-
-### Balance Arquitectónico (Trade-offs)
-
-Aunque una lista de tareas sencilla podría resolverse en un solo archivo con `useState`, estructurar estas capas permite que en las **Unidades 2 y 3** la conexión con un backend real (por ejemplo, NestJS) requiera únicamente cambiar `EXPO_PUBLIC_DEMO_MODE=false` en `.env`, sin modificar ningún componente visual. Al mismo tiempo, se evitó complejidad innecesaria descartando gestores globales pesados (como Redux) o capas de *Use Cases* redundantes para una sola entidad.
+- **Detección multi-sensor:** Reconoce `FINGERPRINT` para Huella Digital, `FACIAL_RECOGNITION` para Face ID en iOS o Reconocimiento Facial en Android e `IRIS`, validando tanto la presencia de hardware como el enrolamiento previo en el sistema operativo.
+- **Exclusividad biométrica para el perfil principal:** En un dispositivo compartido con múltiples perfiles, únicamente el perfil principal propietario puede vincular biometría para evitar que el dueño del teléfono desbloquee cuadernos de terceros con su propia huella o rostro. Los perfiles adicionales operan estrictamente con su PIN de 4 dígitos.
 
 ---
 
-## Estrategia UX/UI: Estética *"Paper & Ink Notebook"*
+## Gestión de Permisos, Seguridad y Almacenamiento Local
 
-- **Paleta Cálida y Textura de Papel:** Se reemplazó el fondo blanco clínico por una textura de papel algodón (`assets/paper-texture.png`) combinada con tonos crema (`#F4EFE6`, `#FFFDF8`), tinta espresso (`#2C221E`) y acentos cuero/terracota (`#8C583A`).
-- **Relieve Táctil y Coherencia Cromática:** Las tarjetas, filtros y botones de prioridad cuentan con bordes inferiores acentuados (`borderBottomWidth`) que simulan hojas de papel apiladas. Tanto los botones del formulario como las pills (`AppBadge`) en las tarjetas comparten la misma semántica de color:
-  - **Baja:** Verde salvia (`#3B6E4C` / `#E6F0E8`)
-  - **Media:** Ámbar / Ocre (`#B86B19` / `#FBF0D9`)
-  - **Alta:** Terracota / Rojo (`#B84030` / `#F9E3DF`)
-- **Usabilidad centrada en la agilidad:**
-  - **Descripción opcional:** Permite anotar recordatorios rápidos ingresando solo el título; si una tarea no tiene descripción, la tarjeta compacta su diseño automáticamente.
-  - **Tachado instantáneo:** Al completar una tarea, tanto el título como la descripción aplican línea tachada (`line-through`) y cambian su indicador lateral a verde.
-  - **Adaptabilidad multi-pantalla:** Se construyeron barras de progreso y selectores flexibles a medida que mantienen sus proporciones tanto en smartphones como en tablets y navegadores web.
+### Permisos Declarativos y Solicitud Just-In-Time
+
+- **Android en `app.json`:** `CAMERA`, `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`, `USE_BIOMETRIC` y `USE_FINGERPRINT`.
+- **iOS en `app.json`:** `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription`, `NSLocationWhenInUseUsageDescription` y `NSFaceIDUsageDescription`, configurados mediante los plugins oficiales `expo-image-picker`, `expo-location`, `expo-local-authentication` y `expo-secure-store`.
+- **Principio de mínimo privilegio:** Los permisos se solicitan únicamente cuando el usuario activa el periférico correspondiente. Todos los servicios propagan `PermissionStatus` y la bandera nativa `canAskAgain` hacia [`AppPermissionDialog`](./src/components/ui/AppPermissionDialog.tsx):
+  - **Rechazo temporal con `canAskAgain` en `true`:** muestra una explicación contextual y ofrece el botón **«Reintentar solicitud»**.
+  - **Denegación permanente con `canAskAgain` en `false`:** ofrece acceso directo **«Abrir Configuración»** mediante `Linking.openSettings()`.
+
+### Seguridad y Privacidad Multi-Perfil
+
+| Medida de Seguridad | Implementación |
+| :--- | :--- |
+| **Hashing criptográfico de PIN** | `SHA-256` con salt por perfil mediante `expo-crypto` para evitar el almacenamiento en texto plano. |
+| **Almacenamiento cifrado** | En Android e iOS el hash del PIN se resguarda en Keystore y Keychain mediante `expo-secure-store`, con respaldo en `AsyncStorage` solo en entorno Web. |
+| **Protección contra fuerza bruta** | Bloqueo temporal de 30 segundos tras 5 intentos fallidos consecutivos de PIN por perfil. |
+| **Protección al iniciar la aplicación** | Al abrir la aplicación se preselecciona el último perfil utilizado desde `LAST_PROFILE_KEY` y se solicita PIN o biometría para acceder al cuaderno. |
+| **Borrado en cascada** | Eliminar un perfil purga sus tareas, borra sus fotos físicas en disco, elimina su secreto en `SecureStore` y libera su caché en `TaskAdapterFactory`. |
+
+### Almacenamiento Local Offline
+
+- [`TaskStorageAdapter`](./src/infra/storage/task-storage.adapter.ts) almacena cada cuaderno bajo una clave aislada `@todo_tasks_v2_<profileId>`, persistiendo `photoUri`, `photoName`, `photoSizeKb` y el objeto `location` con `latitude`, `longitude`, `accuracy`, `address` y `capturedAt`.
+- Toda escritura confirma primero `AsyncStorage.setItem` antes de actualizar la caché en memoria y propaga posibles fallos hacia el `Snackbar` de [`App.tsx`](./App.tsx).
+- [`ProfileSettingsModal`](./src/components/auth/ProfileSettingsModal.tsx) despliega en tiempo real las métricas locales del perfil activo: total de tareas, cantidad de fotos, espacio acumulado en `KB` y registros GPS.
 
 ---
 
-## Vistas y Flujo del Sistema
+## Pruebas de Funcionalidad, Fiabilidad y Precisión
 
-### 1. Estado Inicial y Creación de Tareas
+| Nivel | Herramienta | Comando | Resultado |
+| :--- | :--- | :--- | :---: |
+| **Tipado Estático** | TypeScript en modo estricto | `npm run typecheck` | **0 errores** |
+| **Pruebas Unitarias** | Jest y `ts-jest` | `npm run test:coverage` | **4 suites · 42/42 tests pasando** |
+| **Pruebas End-to-End** | Playwright en viewport `412×915` | `npm run test:e2e` | **4/4 escenarios pasando** |
 
-Al iniciar por primera vez, la aplicación comienza en `0` tareas con un estado vacío limpio (`TaskEmptyState`). Al abrir el modal de nueva tarea, el teclado respeta los campos de entrada (`KeyboardAvoidingView`), permite elegir la prioridad y confirma la creación mediante un `Snackbar` inferior.
+### Pruebas Unitarias y Cobertura con Jest
 
-| Estado Inicial Vacío (0%) | Modal Nueva Tarea con Teclado | Tarea Creada + Notificación |
+| Módulo | Sentencias | Funciones | Casos Clave Validados |
+| :--- | :---: | :---: | :--- |
+| `biometric.service.ts` | **92.5%** | **100%** | Huella Digital, Face ID en iOS, Reconocimiento Facial en Android, ausencia de hardware, falta de enrolamiento, cancelación, rechazo y excepciones nativas. |
+| `location.service.ts` | **90.6%** | **91.7%** | Validación de rangos geográficos, formateo a 4 decimales, verificación de servicio GPS activo, lectura en caché, timeout de 5 segundos con fallback, resiliencia offline y `canAskAgain`. |
+| `camera.service.ts` | **88.4%** | **87.5%** | Permisos denegados con `canAskAgain`, rechazo de archivos sobre `15 MB`, redimensionamiento sobre `1080px`, preservación hasta `1080px`, optimización JPEG al 70%, limpieza de temporales, nombre de archivo, galería, persistencia Web y borrado restringido a `task-photos/`. |
+| `task-storage.adapter.ts` | **91.7%** | **100%** | Aislamiento entre perfiles, persistencia de foto y GPS, limpieza física al reemplazar, quitar o eliminar fotos y propagación de fallos de escritura. |
+| `profile-storage.adapter.ts` | **74.8%** | **87.0%** | Hashing `SHA-256` en `SecureStore`, bloqueo de 30 segundos tras 5 fallos, rechazo de nombres duplicados, exclusividad biométrica de un solo propietario y borrado en cascada. |
+
+![Resultados de Pruebas Unitarias Jest](./screenshots/u2/07-resultados-tests-jest.png)
+
+### Pruebas End-to-End con Playwright
+
+1. **Ciclo completo con periféricos:** Creación de perfil con PIN, adjunto de imagen desde galería `evidencia-cafe.png` y captura GPS geolocalizada en `-33.4489, -70.6693`, vista previa ampliada, completado al `100%` y eliminación con confirmación.
+2. **Protección de sesión:** Verificación de solicitud de PIN al recargar la aplicación, rechazo de PIN inválido y desbloqueo con PIN correcto.
+3. **Aislamiento multi-perfil:** Creación de dos perfiles independientes validando que las tareas privadas de uno no son visibles en el otro.
+4. **Límite de tamaño de imagen:** Intento de carga de una imagen de `16 MB` validando el rechazo inmediato en el formulario con el mensaje de límite máximo de `15 MB`.
+
+![Resultados de Pruebas E2E Playwright](./screenshots/u2/08-resultados-tests-playwright.png)
+
+---
+
+## Evidencia Visual
+
+### Flujo Principal en Aplicación
+
+| 1. Creación de Perfil con PIN | 2. Bloqueo al Reabrir y Validación de PIN | 3. Formulario con Foto Adjunta y GPS |
 | :---: | :---: | :---: |
-| <img src="screenshots/01-estado-vacio.jpg" width="250" alt="Estado Inicial Vacío" /> | <img src="screenshots/02-modal-nueva-tarea.jpg" width="250" alt="Modal Nueva Tarea" /> | <img src="screenshots/03-tarea-creada-snackbar.jpg" width="250" alt="Tarea Creada" /> |
+| ![Crear perfil con PIN](./screenshots/u2/01-crear-perfil-pin.png) | ![Desbloqueo PIN incorrecto](./screenshots/u2/02-desbloqueo-pin-error.png) | ![Formulario con foto y GPS](./screenshots/u2/03-formulario-foto-gps.png) |
 
----
-
-### 2. Panel de Progreso, Prioridades y Tachado de Completadas
-
-A medida que se registran y completan tareas, el panel superior recalcula en tiempo real el porcentaje de avance y los contadores (`Totales`, `Pendientes`, `Completadas`). Las tareas marcadas como hechas aplican tachado automático en su título y descripción, y al completar todas las tareas la barra alcanza el `100%` en color verde.
-
-| Listado y Prioridades (20%) | Tareas Tachadas y Avance (60%) | Progreso Completado (100%) |
+| 4. Dashboard con Foto Adjunta y Coordenadas GPS | 5. Vista Previa Ampliada de Fotografía | 6. Administración de Perfil y Métricas Locales |
 | :---: | :---: | :---: |
-| <img src="screenshots/04-dashboard-prioridades.jpg" width="250" alt="Dashboard 20%" /> | <img src="screenshots/05-progreso-parcial-tachado.jpg" width="250" alt="Progreso 60% Tachado" /> | <img src="screenshots/06-progreso-completado-100.jpg" width="250" alt="Progreso 100%" /> |
+| ![Tarea con foto y GPS](./screenshots/u2/04-tarea-con-perifericos.png) | ![Vista previa ampliada](./screenshots/u2/05-vista-previa-foto.png) | ![Ajustes de perfil y almacenamiento](./screenshots/u2/06-ajustes-perfil-almacenamiento.png) |
 
----
+### Evidencia en Dispositivo Físico
 
-### 3. Edición de Tareas y Eliminación con Confirmación
+Capturas tomadas directamente en dispositivo físico Android ejecutando **Expo Go**. Por privacidad, la dirección exacta y las coordenadas fueron difuminadas en las capturas, y el diálogo biométrico nativo no admite captura de pantalla debido a la protección de seguridad `FLAG_SECURE` del sistema operativo.
 
-Cada tarjeta permite editar sus datos precargando el formulario modal (`Editar Tarea`) o eliminar el registro tras confirmar la acción en el diálogo de seguridad (`AppConfirmDialog`).
+| 1. Permiso Nativo de Cámara | 2. Permiso Nativo de Ubicación GPS |
+| :---: | :---: |
+| ![Permiso nativo de cámara](./screenshots/u2/09-nativo-permiso-camara.jpg) | ![Permiso nativo de ubicación](./screenshots/u2/10-nativo-permiso-ubicacion.jpg) |
 
-| Modal de Edición de Tarea | Diálogo de Confirmación de Borrado | Tarea Eliminada + Recálculo |
-| :---: | :---: | :---: |
-| <img src="screenshots/07-modal-editar-tarea.jpg" width="250" alt="Editar Tarea" /> | <img src="screenshots/08-confirmar-eliminacion.jpg" width="250" alt="Confirmar Eliminación" /> | <img src="screenshots/09-tarea-eliminada-snackbar.jpg" width="250" alt="Tarea Eliminada" /> |
-
----
-
-### 4. Filtros por Estado y Búsqueda en Tiempo Real
-
-El usuario puede alternar entre las pestañas `Todas`, `Pendientes` y `Hechas`, o filtrar instantáneamente por texto mediante la barra de búsqueda.
-
-| Filtro: Pestaña Pendientes | Filtro: Pestaña Hechas | Búsqueda Instantánea (`"Pan"`) |
-| :---: | :---: | :---: |
-| <img src="screenshots/10-filtro-pendientes.jpg" width="250" alt="Filtro Pendientes" /> | <img src="screenshots/11-filtro-hechas.jpg" width="250" alt="Filtro Hechas" /> | <img src="screenshots/12-busqueda-tiempo-real.jpg" width="250" alt="Búsqueda en Tiempo Real" /> |
-
----
-
-## Nota sobre el proceso de desarrollo
-
-Este proyecto fue desarrollado con el apoyo de herramientas avanzadas de inteligencia artificial (el agente de programación `Antigravity` de Google DeepMind) para agilizar tareas de maquetación de estilos, refactorización de componentes en React Native, tipado estricto en TypeScript y estructuración documental.
-
-El uso de estas herramientas se enmarca en una metodología de **pair programming colaborativo**, donde la **definición de la arquitectura desacoplada por capas, la estrategia de persistencia con Feature Flags, la identidad visual *"Paper & Ink"*, las pruebas en dispositivos físicos y cada decisión técnica y de experiencia de usuario fueron dirigidas, evaluadas y supervisadas en todo momento por la desarrolladora Gina Norambuena Sánchez**, quien actuó como **arquitecta principal de la aplicación**, validando cada cambio antes de su integración al repositorio.
+| 3. Captura Real con Cámara y Registro GPS | 4. Tarea Guardada con Foto y Dirección GPS |
+| :---: | :---: |
+| ![Formulario con cámara y GPS en Android](./screenshots/u2/11-nativo-formulario-foto-gps.jpg) | ![Dashboard con foto y GPS en Android](./screenshots/u2/12-nativo-dashboard-foto-gps.jpg) |

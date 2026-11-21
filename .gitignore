@@ -34,6 +34,11 @@ yarn-error.*
 .env
 .env*.local
 
+# test artifacts
+playwright-report/
+test-results/
+coverage/
+
 # typescript
 *.tsbuildinfo
 

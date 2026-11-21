@@ -8,7 +8,30 @@ export const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 14,
+    gap: 10,
+  },
+  titleTextGroup: {
+    flex: 1,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerIconBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 253, 248, 0.90)',
+    borderWidth: 1,
+    borderBottomWidth: 2,
+    borderColor: semanticColors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
     fontSize: 27,

@@ -34,4 +34,20 @@ export const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 20,
   },
+  photoModalContainer: {
+    backgroundColor: paperPalette.paperSheet,
+    marginHorizontal: 18,
+    borderRadius: 20,
+    padding: 14,
+    gap: 12,
+    borderWidth: 1,
+    borderBottomWidth: 3,
+    borderColor: paperPalette.paperLines,
+  },
+  photoModalImage: {
+    width: '100%',
+    height: 360,
+    borderRadius: 14,
+    backgroundColor: paperPalette.paperMuted,
+  },
 });

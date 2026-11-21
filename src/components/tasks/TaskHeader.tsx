@@ -1,9 +1,13 @@
 import React from 'react';
-import { Text, View } from 'react-native';
-import { appTheme, semanticColors } from '../../theme/app-theme';
+import { Pressable, Text, View } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { appTheme, paperPalette, semanticColors } from '../../theme/app-theme';
 import { styles } from './styles/task-header.styles';
 
 interface TaskHeaderProps {
+  profileName?: string;
+  onOpenProfile?: () => void;
+  onLogout?: () => void;
   stats: {
     total: number;
     completed: number;
@@ -13,12 +17,54 @@ interface TaskHeaderProps {
   };
 }
 
-export const TaskHeader: React.FC<TaskHeaderProps> = ({ stats }) => {
+export const TaskHeader: React.FC<TaskHeaderProps> = ({
+  profileName,
+  onOpenProfile,
+  onLogout,
+  stats,
+}) => {
   return (
     <View style={styles.container}>
       <View style={styles.titleRow}>
-        <Text style={styles.title}>Mis Tareas</Text>
-        <Text style={styles.subtitle}>Organiza tus pendientes diarios</Text>
+        <View style={styles.titleTextGroup}>
+          <Text style={styles.title}>Mis Tareas</Text>
+          <Text style={styles.subtitle}>
+            {profileName ? `Cuaderno de ${profileName}` : 'Organiza tus pendientes diarios'}
+          </Text>
+        </View>
+
+        {(onOpenProfile || onLogout) && (
+          <View style={styles.headerActions}>
+            {onOpenProfile && (
+              <Pressable
+                onPress={onOpenProfile}
+                style={styles.headerIconBtn}
+                accessibilityRole="button"
+                accessibilityLabel="Administrar perfil"
+              >
+                <MaterialCommunityIcons
+                  name="account-circle-outline"
+                  size={21}
+                  color={paperPalette.accentPrimary}
+                />
+              </Pressable>
+            )}
+            {onLogout && (
+              <Pressable
+                onPress={onLogout}
+                style={styles.headerIconBtn}
+                accessibilityRole="button"
+                accessibilityLabel="Cerrar sesión"
+              >
+                <MaterialCommunityIcons
+                  name="logout"
+                  size={20}
+                  color={semanticColors.danger}
+                />
+              </Pressable>
+            )}
+          </View>
+        )}
       </View>
 
       <View style={styles.progressCard}>
