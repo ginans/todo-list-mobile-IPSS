@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Image, Text, View, ScrollView, Pressable } from 'react-native';
 import { ActivityIndicator, Modal, Portal } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -8,7 +8,12 @@ import { TaskPriority } from '../../core/task/enums/task-priority.enum';
 import { PermissionStatus } from '../../core/device/enums/permission-status.enum';
 import { CreateTaskInput } from '../../core/task/types/create-task.type';
 import { UpdateTaskInput } from '../../core/task/types/update-task.type';
-import { captureFromCamera, pickFromGallery } from '../../infra/device/camera.service';
+import {
+  captureFromCamera,
+  deletePersistedPhoto,
+  getPhotoDisplayName,
+  pickFromGallery,
+} from '../../infra/device/camera.service';
 import { formatCoordinates, getCurrentLocation } from '../../infra/device/location.service';
 import { APP_MESSAGES } from '../../constants/messages.constants';
 import { AppInput } from '../ui/AppInput';
@@ -30,6 +35,13 @@ interface PriorityOption {
   label: string;
   color: string;
   activeBg: string;
+}
+
+interface PermissionAlertState {
+  title: string;
+  message: string;
+  canAskAgain: boolean;
+  retryAction?: () => void;
 }
 
 const PRIORITY_OPTIONS: PriorityOption[] = [
@@ -66,25 +78,42 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<TaskPriority>(TaskPriority.MEDIUM);
   const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [photoName, setPhotoName] = useState<string | null>(null);
   const [photoSizeKb, setPhotoSizeKb] = useState<number | null>(null);
   const [location, setLocation] = useState<ITaskLocation | null>(null);
 
   const [isCapturingPhoto, setIsCapturingPhoto] = useState(false);
   const [isCapturingLocation, setIsCapturingLocation] = useState(false);
   const [peripheralError, setPeripheralError] = useState<string | null>(null);
-  const [permissionAlert, setPermissionAlert] = useState<{
-    title: string;
-    message: string;
-  } | null>(null);
+  const [permissionAlert, setPermissionAlert] = useState<PermissionAlertState | null>(null);
   const [errors, setErrors] = useState<{ title?: string }>({});
+
+  // Controla sesiones de captura asíncrona para que cerrar el modal jamás bloquee
+  // ni deje respuestas tardías o archivos huérfanos en disco.
+  const modalSessionRef = useRef(0);
+  const sessionPhotosRef = useRef<Set<string>>(new Set());
+
+  const cleanupSessionPhotos = (keepUri?: string | null) => {
+    const initialUri = initialTask?.photoUri;
+    sessionPhotosRef.current.forEach((uri) => {
+      if (uri !== keepUri && uri !== initialUri) {
+        void deletePersistedPhoto(uri);
+      }
+    });
+    sessionPhotosRef.current.clear();
+  };
 
   useEffect(() => {
     if (visible) {
+      modalSessionRef.current += 1;
+      sessionPhotosRef.current.clear();
+
       if (initialTask) {
         setTitle(initialTask.title);
         setDescription(initialTask.description || '');
         setPriority(initialTask.priority);
         setPhotoUri(initialTask.photoUri ?? null);
+        setPhotoName(initialTask.photoName ?? null);
         setPhotoSizeKb(initialTask.photoSizeKb ?? null);
         setLocation(initialTask.location ?? null);
       } else {
@@ -92,22 +121,34 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         setDescription('');
         setPriority(TaskPriority.MEDIUM);
         setPhotoUri(null);
+        setPhotoName(null);
         setPhotoSizeKb(null);
         setLocation(null);
       }
+      setIsCapturingPhoto(false);
+      setIsCapturingLocation(false);
       setErrors({});
       setPeripheralError(null);
       setPermissionAlert(null);
     }
   }, [visible, initialTask]);
 
+  const handleDismiss = () => {
+    if (loading) return;
+    modalSessionRef.current += 1;
+    setIsCapturingPhoto(false);
+    setIsCapturingLocation(false);
+    cleanupSessionPhotos(null);
+    onDismiss();
+  };
+
   const validate = (): boolean => {
     const newErrors: { title?: string } = {};
 
     if (!title.trim()) {
-      newErrors.title = 'El título de la tarea es obligatorio.';
+      newErrors.title = APP_MESSAGES.TASKS.TITLE_REQUIRED;
     } else if (title.trim().length < 3) {
-      newErrors.title = 'El título debe tener al menos 3 caracteres.';
+      newErrors.title = APP_MESSAGES.TASKS.TITLE_MIN;
     }
 
     setErrors(newErrors);
@@ -115,23 +156,40 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   };
 
   const handleCapturePhoto = async (source: 'camera' | 'gallery') => {
+    const activeSession = modalSessionRef.current;
     setPeripheralError(null);
     setIsCapturingPhoto(true);
     try {
       const result =
         source === 'camera' ? await captureFromCamera() : await pickFromGallery();
 
+      // Si el usuario cerró el modal mientras la cámara/galería respondía,
+      // descartamos el resultado y eliminamos la foto para evitar archivos huérfanos.
+      if (modalSessionRef.current !== activeSession) {
+        if (result.success && result.data?.uri) {
+          void deletePersistedPhoto(result.data.uri);
+        }
+        return;
+      }
+
       if (result.canceled) {
         return;
       }
 
       if (result.permissionStatus === PermissionStatus.DENIED) {
+        const canAskAgain = Boolean(result.canAskAgain);
         setPermissionAlert({
           title: source === 'camera' ? 'Permiso de Cámara' : 'Permiso de Galería',
           message:
             source === 'camera'
-              ? APP_MESSAGES.DEVICE.CAMERA_DENIED_DETAIL
-              : APP_MESSAGES.DEVICE.GALLERY_DENIED_DETAIL,
+              ? canAskAgain
+                ? APP_MESSAGES.DEVICE.CAMERA_DENIED_RETRY
+                : APP_MESSAGES.DEVICE.CAMERA_DENIED_DETAIL
+              : canAskAgain
+                ? APP_MESSAGES.DEVICE.GALLERY_DENIED_RETRY
+                : APP_MESSAGES.DEVICE.GALLERY_DENIED_DETAIL,
+          canAskAgain,
+          retryAction: canAskAgain ? () => void handleCapturePhoto(source) : undefined,
         });
         return;
       }
@@ -141,23 +199,54 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         return;
       }
 
+      const previousTempUri =
+        photoUri && sessionPhotosRef.current.has(photoUri) ? photoUri : null;
+      sessionPhotosRef.current.add(result.data.uri);
       setPhotoUri(result.data.uri);
+      setPhotoName(result.data.fileName);
       setPhotoSizeKb(result.data.sizeKb);
+
+      if (previousTempUri && previousTempUri !== result.data.uri) {
+        sessionPhotosRef.current.delete(previousTempUri);
+        void deletePersistedPhoto(previousTempUri);
+      }
     } finally {
-      setIsCapturingPhoto(false);
+      if (modalSessionRef.current === activeSession) {
+        setIsCapturingPhoto(false);
+      }
     }
   };
 
+  const handleRemovePhoto = () => {
+    if (photoUri && sessionPhotosRef.current.has(photoUri)) {
+      sessionPhotosRef.current.delete(photoUri);
+      void deletePersistedPhoto(photoUri);
+    }
+    setPhotoUri(null);
+    setPhotoName(null);
+    setPhotoSizeKb(null);
+  };
+
   const handleCaptureLocation = async () => {
+    const activeSession = modalSessionRef.current;
     setPeripheralError(null);
     setIsCapturingLocation(true);
     try {
       const result = await getCurrentLocation();
 
+      if (modalSessionRef.current !== activeSession) {
+        return;
+      }
+
       if (result.permissionStatus === PermissionStatus.DENIED) {
+        const canAskAgain = Boolean(result.canAskAgain);
         setPermissionAlert({
           title: 'Permiso de Ubicación GPS',
-          message: APP_MESSAGES.DEVICE.LOCATION_DENIED_DETAIL,
+          message: canAskAgain
+            ? APP_MESSAGES.DEVICE.LOCATION_DENIED_RETRY
+            : APP_MESSAGES.DEVICE.LOCATION_DENIED_DETAIL,
+          canAskAgain,
+          retryAction: canAskAgain ? () => void handleCaptureLocation() : undefined,
         });
         return;
       }
@@ -169,7 +258,9 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
 
       setLocation(result.data);
     } finally {
-      setIsCapturingLocation(false);
+      if (modalSessionRef.current === activeSession) {
+        setIsCapturingLocation(false);
+      }
     }
   };
 
@@ -182,11 +273,14 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         description: description.trim(),
         priority,
         photoUri: photoUri ?? null,
+        photoName: photoName ?? null,
         photoSizeKb: photoSizeKb ?? null,
         location: location ?? null,
       };
       const success = await onSubmit(payload);
       if (success) {
+        modalSessionRef.current += 1;
+        cleanupSessionPhotos(photoUri);
         onDismiss();
       }
       return;
@@ -197,12 +291,15 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       description: description.trim(),
       priority,
       ...(photoUri ? { photoUri } : {}),
+      ...(photoName ? { photoName } : {}),
       ...(photoSizeKb !== null ? { photoSizeKb } : {}),
       ...(location ? { location } : {}),
     };
 
     const success = await onSubmit(payload);
     if (success) {
+      modalSessionRef.current += 1;
+      cleanupSessionPhotos(photoUri);
       onDismiss();
     }
   };
@@ -211,7 +308,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     <Portal>
       <Modal
         visible={visible}
-        onDismiss={loading ? undefined : onDismiss}
+        onDismiss={handleDismiss}
         contentContainerStyle={styles.modalContainer}
       >
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -296,16 +393,19 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   resizeMode="cover"
                 />
                 <View style={styles.photoPreviewMeta}>
-                  <Text style={styles.photoPreviewTitle}>Imagen optimizada</Text>
+                  <Text
+                    style={styles.photoPreviewTitle}
+                    numberOfLines={1}
+                    ellipsizeMode="middle"
+                  >
+                    {getPhotoDisplayName(photoName, photoUri)}
+                  </Text>
                   <Text style={styles.photoPreviewSub}>
-                    {photoSizeKb ? `Peso guardado: ${photoSizeKb} KB` : 'Lista para guardar'}
+                    {photoSizeKb ? `${photoSizeKb} KB` : 'Lista para guardar'}
                   </Text>
                 </View>
                 <Pressable
-                  onPress={() => {
-                    setPhotoUri(null);
-                    setPhotoSizeKb(null);
-                  }}
+                  onPress={handleRemovePhoto}
                   style={styles.removeChipBtn}
                   accessibilityLabel="Quitar foto adjunta"
                   disabled={loading || isCapturingPhoto}
@@ -320,7 +420,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             ) : (
               <View style={styles.peripheralButtonsRow}>
                 <Pressable
-                  onPress={() => handleCapturePhoto('camera')}
+                  onPress={() => void handleCapturePhoto('camera')}
                   style={styles.peripheralButton}
                   disabled={loading || isCapturingPhoto}
                   accessibilityRole="button"
@@ -338,7 +438,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 </Pressable>
 
                 <Pressable
-                  onPress={() => handleCapturePhoto('gallery')}
+                  onPress={() => void handleCapturePhoto('gallery')}
                   style={styles.peripheralButton}
                   disabled={loading || isCapturingPhoto}
                   accessibilityRole="button"
@@ -373,7 +473,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   </Text>
                 </View>
                 <Pressable
-                  onPress={handleCaptureLocation}
+                  onPress={() => void handleCaptureLocation()}
                   style={styles.removeChipBtn}
                   accessibilityLabel="Actualizar ubicación GPS"
                   disabled={loading || isCapturingLocation}
@@ -403,7 +503,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               </View>
             ) : (
               <Pressable
-                onPress={handleCaptureLocation}
+                onPress={() => void handleCaptureLocation()}
                 style={styles.peripheralButton}
                 disabled={loading || isCapturingLocation}
                 accessibilityRole="button"
@@ -433,7 +533,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
           <View style={styles.actionsContainer}>
             <AppButton
               label="Cancelar"
-              onPress={onDismiss}
+              onPress={handleDismiss}
               variant="ghost"
               disabled={loading}
               style={styles.actionButton}
@@ -455,6 +555,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         visible={Boolean(permissionAlert)}
         title={permissionAlert?.title ?? ''}
         message={permissionAlert?.message ?? ''}
+        canAskAgain={permissionAlert?.canAskAgain}
+        onRetry={permissionAlert?.retryAction}
         onDismiss={() => setPermissionAlert(null)}
       />
     </Portal>

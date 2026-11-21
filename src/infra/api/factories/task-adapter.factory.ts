@@ -1,6 +1,6 @@
 import { ITaskRepository } from '../../../core/task/interfaces/task-repository.interface';
 import { envConfig } from '../../../config/env.config';
-import { TaskStorageAdapter } from '../adapters/task-storage.adapter';
+import { TaskStorageAdapter } from '../../storage/task-storage.adapter';
 import { TaskHttpAdapter } from '../adapters/task-http.adapter';
 
 export class TaskAdapterFactory {
@@ -21,6 +21,11 @@ export class TaskAdapterFactory {
 
     TaskAdapterFactory.instances.set(cacheKey, instance);
     return instance;
+  }
+
+  public static evictRepository(userId?: string): void {
+    const cacheKey = `${envConfig.dataSource}:${userId ?? 'default'}`;
+    TaskAdapterFactory.instances.delete(cacheKey);
   }
 
   public static resetInstance(): void {

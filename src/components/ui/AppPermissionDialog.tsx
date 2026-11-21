@@ -10,6 +10,8 @@ interface AppPermissionDialogProps {
   visible: boolean;
   title: string;
   message: string;
+  canAskAgain?: boolean;
+  onRetry?: () => void;
   onDismiss: () => void;
 }
 
@@ -17,6 +19,8 @@ export const AppPermissionDialog: React.FC<AppPermissionDialogProps> = ({
   visible,
   title,
   message,
+  canAskAgain = false,
+  onRetry,
   onDismiss,
 }) => {
   const handleOpenSettings = async () => {
@@ -28,6 +32,11 @@ export const AppPermissionDialog: React.FC<AppPermissionDialogProps> = ({
         // Fallback silencioso si el entorno no soporta openSettings
       }
     }
+  };
+
+  const handleRetry = () => {
+    onDismiss();
+    onRetry?.();
   };
 
   return (
@@ -55,13 +64,22 @@ export const AppPermissionDialog: React.FC<AppPermissionDialogProps> = ({
             variant="ghost"
             compact
           />
-          {Platform.OS !== 'web' && (
+          {canAskAgain && onRetry ? (
             <AppButton
-              label="Abrir Configuración"
-              onPress={handleOpenSettings}
+              label="Reintentar solicitud"
+              onPress={handleRetry}
               variant="primary"
               compact
             />
+          ) : (
+            Platform.OS !== 'web' && (
+              <AppButton
+                label="Abrir Configuración"
+                onPress={handleOpenSettings}
+                variant="primary"
+                compact
+              />
+            )
           )}
         </Dialog.Actions>
       </Dialog>

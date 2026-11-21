@@ -10,6 +10,7 @@ interface ProfileSettingsModalProps {
   visible: boolean;
   onDismiss: () => void;
   profile: IUserProfile;
+  biometricLabel?: string;
   storageStats: {
     total: number;
     photosCount: number;
@@ -23,6 +24,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   visible,
   onDismiss,
   profile,
+  biometricLabel = 'Biometría',
   storageStats,
   onDeleteProfile,
 }) => {
@@ -54,7 +56,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
             <Text style={styles.profileName}>{profile.name}</Text>
             <Text style={styles.profileSubtitle}>
               {profile.biometricEnabled
-                ? 'Protegido con PIN y Huella Digital'
+                ? `Protegido con PIN y ${biometricLabel}`
                 : 'Protegido con PIN de 4 dígitos'}
             </Text>
           </View>
@@ -90,7 +92,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
       <AppConfirmDialog
         visible={isConfirmVisible}
         title="¿Eliminar tu perfil?"
-        message={`Se eliminará permanentemente el perfil "${profile.name}" junto con todas sus tareas guardadas en este dispositivo.`}
+        message={`Se eliminará permanentemente el perfil "${profile.name}" junto con todas sus tareas y fotos guardadas en este dispositivo.`}
         confirmLabel="Eliminar"
         cancelLabel="Cancelar"
         isDestructive

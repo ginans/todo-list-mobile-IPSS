@@ -13,34 +13,31 @@ export const useAuthProfiles = () => {
   const [profiles, setProfiles] = useState<IUserProfile[]>([]);
   const [activeProfile, setActiveProfile] = useState<IUserProfile | null>(null);
   const [lastProfileId, setLastProfileId] = useState<string | null>(null);
-  const [isSwitchingProfile, setIsSwitchingProfile] = useState<boolean>(false);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
   const [authError, setAuthError] = useState<string | null>(null);
   const [biometricCapability, setBiometricCapability] = useState<IBiometricCapability>({
     available: false,
     hasHardware: false,
     isEnrolled: false,
+    biometryType: 'none',
     label: APP_MESSAGES.AUTH.BIOMETRIC_UNAVAILABLE,
   });
 
   const initializeAuth = useCallback(async () => {
     setIsAuthLoading(true);
     try {
-      const [storedProfiles, capability, savedActiveId, savedLastId] = await Promise.all([
+      const [storedProfiles, capability, savedLastId] = await Promise.all([
         profileStorage.getProfiles(),
         getBiometricCapability(),
-        profileStorage.getActiveProfileId(),
         profileStorage.getLastProfileId(),
       ]);
 
       setProfiles(storedProfiles);
       setBiometricCapability(capability);
-      setLastProfileId(savedLastId ?? savedActiveId ?? storedProfiles[0]?.id ?? null);
-
-      if (savedActiveId) {
-        const found = storedProfiles.find((p) => p.id === savedActiveId) || null;
-        setActiveProfile(found);
-      }
+      // Por seguridad, al abrir la app no se restaura sesión automáticamente:
+      // se preselecciona el último perfil y se exige PIN o biometría.
+      setLastProfileId(savedLastId ?? storedProfiles[0]?.id ?? null);
+      setActiveProfile(null);
     } finally {
       setIsAuthLoading(false);
     }
@@ -54,11 +51,10 @@ export const useAuthProfiles = () => {
     setAuthError(null);
     try {
       const created = await profileStorage.createProfile(input);
-      await profileStorage.setActiveProfileId(created.id);
+      await profileStorage.setLastProfileId(created.id);
       setProfiles((prev) => [...prev, created]);
       setActiveProfile(created);
       setLastProfileId(created.id);
-      setIsSwitchingProfile(false);
       return true;
     } catch (err) {
       setAuthError(err instanceof Error ? err.message : APP_MESSAGES.AUTH.PIN_INVALID_FORMAT);
@@ -69,9 +65,14 @@ export const useAuthProfiles = () => {
   const unlockWithPin = useCallback(
     async (profileId: string, pin: string): Promise<boolean> => {
       setAuthError(null);
-      const isValid = await profileStorage.verifyPin(profileId, pin);
-      if (!isValid) {
-        setAuthError(APP_MESSAGES.AUTH.PIN_INCORRECT);
+      try {
+        const isValid = await profileStorage.verifyPin(profileId, pin);
+        if (!isValid) {
+          setAuthError(APP_MESSAGES.AUTH.PIN_INCORRECT);
+          return false;
+        }
+      } catch (err) {
+        setAuthError(err instanceof Error ? err.message : APP_MESSAGES.AUTH.PIN_INCORRECT);
         return false;
       }
 
@@ -80,10 +81,9 @@ export const useAuthProfiles = () => {
         return false;
       }
 
-      await profileStorage.setActiveProfileId(target.id);
+      await profileStorage.setLastProfileId(target.id);
       setActiveProfile(target);
       setLastProfileId(target.id);
-      setIsSwitchingProfile(false);
       return true;
     },
     [profiles]
@@ -102,21 +102,10 @@ export const useAuthProfiles = () => {
       return false;
     }
 
-    await profileStorage.setActiveProfileId(profile.id);
+    await profileStorage.setLastProfileId(profile.id);
     setActiveProfile(profile);
     setLastProfileId(profile.id);
-    setIsSwitchingProfile(false);
     return true;
-  }, []);
-
-  const openProfileSwitcher = useCallback(() => {
-    setAuthError(null);
-    setIsSwitchingProfile(true);
-  }, []);
-
-  const cancelProfileSwitch = useCallback(() => {
-    setAuthError(null);
-    setIsSwitchingProfile(false);
   }, []);
 
   const deleteProfile = useCallback(
@@ -130,7 +119,6 @@ export const useAuthProfiles = () => {
 
       if (activeProfile?.id === profileId) {
         setActiveProfile(null);
-        setIsSwitchingProfile(false);
       }
       if (lastProfileId === profileId) {
         setLastProfileId(remaining[0]?.id ?? null);
@@ -142,9 +130,7 @@ export const useAuthProfiles = () => {
   );
 
   const logout = useCallback(async () => {
-    await profileStorage.setActiveProfileId(null);
     setActiveProfile(null);
-    setIsSwitchingProfile(false);
     setAuthError(null);
   }, []);
 
@@ -156,15 +142,12 @@ export const useAuthProfiles = () => {
     profiles,
     activeProfile,
     lastProfileId,
-    isSwitchingProfile,
     isAuthLoading,
     authError,
     biometricCapability,
     createProfile,
     unlockWithPin,
     unlockWithBiometrics,
-    openProfileSwitcher,
-    cancelProfileSwitch,
     deleteProfile,
     logout,
     clearAuthError,

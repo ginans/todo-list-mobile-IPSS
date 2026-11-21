@@ -1,15 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ITask } from '../../../core/task/interfaces/task.interface';
-import { ITaskRepository } from '../../../core/task/interfaces/task-repository.interface';
-import { CreateTaskInput } from '../../../core/task/types/create-task.type';
-import { UpdateTaskInput } from '../../../core/task/types/update-task.type';
-import { TaskPriority } from '../../../core/task/enums/task-priority.enum';
-import { TaskStatus } from '../../../core/task/enums/task-status.enum';
-import { deletePersistedPhoto } from '../../device/camera.service';
-import { APP_MESSAGES } from '../../../constants/messages.constants';
+import { ITask } from '../../core/task/interfaces/task.interface';
+import { ITaskRepository } from '../../core/task/interfaces/task-repository.interface';
+import { CreateTaskInput } from '../../core/task/types/create-task.type';
+import { UpdateTaskInput } from '../../core/task/types/update-task.type';
+import { TaskPriority } from '../../core/task/enums/task-priority.enum';
+import { TaskStatus } from '../../core/task/enums/task-status.enum';
+import { deletePersistedPhoto } from '../device/camera.service';
+import { APP_MESSAGES } from '../../constants/messages.constants';
 
-const BASE_STORAGE_KEY = '@todo_tasks_v2';
-const SIMULATED_LATENCY_MS = 180;
+export const TASKS_STORAGE_BASE_KEY = '@todo_tasks_v2';
 
 export class TaskStorageAdapter implements ITaskRepository {
   private inMemoryTasks: ITask[] | null = null;
@@ -18,12 +17,7 @@ export class TaskStorageAdapter implements ITaskRepository {
 
   constructor(userId?: string) {
     this.userId = userId;
-    this.storageKey = userId ? `${BASE_STORAGE_KEY}_${userId}` : BASE_STORAGE_KEY;
-  }
-
-  private async simulateDelay(): Promise<void> {
-    if (SIMULATED_LATENCY_MS <= 0) return;
-    await new Promise((resolve) => setTimeout(resolve, SIMULATED_LATENCY_MS));
+    this.storageKey = userId ? `${TASKS_STORAGE_BASE_KEY}_${userId}` : TASKS_STORAGE_BASE_KEY;
   }
 
   private async loadFromStorage(): Promise<ITask[]> {
@@ -42,29 +36,26 @@ export class TaskStorageAdapter implements ITaskRepository {
   }
 
   private async saveToStorage(tasks: ITask[]): Promise<void> {
-    this.inMemoryTasks = tasks;
     try {
       await AsyncStorage.setItem(this.storageKey, JSON.stringify(tasks));
-    } catch (error) {
-      console.warn('[TaskStorageAdapter] Error al persistir en AsyncStorage:', error);
+      this.inMemoryTasks = tasks;
+    } catch {
+      throw new Error(APP_MESSAGES.TASKS.STORAGE_SAVE_ERROR);
     }
   }
 
   async getAll(): Promise<ITask[]> {
-    await this.simulateDelay();
     const tasks = await this.loadFromStorage();
     return [...tasks];
   }
 
   async getById(id: string): Promise<ITask | null> {
-    await this.simulateDelay();
     const tasks = await this.loadFromStorage();
     const found = tasks.find((t) => t.id === id);
     return found ? { ...found } : null;
   }
 
   async create(input: CreateTaskInput): Promise<ITask> {
-    await this.simulateDelay();
     const tasks = await this.loadFromStorage();
 
     const now = new Date().toISOString();
@@ -76,6 +67,7 @@ export class TaskStorageAdapter implements ITaskRepository {
       status: input.status || TaskStatus.PENDING,
       priority: input.priority || TaskPriority.MEDIUM,
       ...(input.photoUri ? { photoUri: input.photoUri } : {}),
+      ...(input.photoName ? { photoName: input.photoName } : {}),
       ...(input.photoSizeKb !== undefined ? { photoSizeKb: input.photoSizeKb } : {}),
       ...(input.location ? { location: input.location } : {}),
       createdAt: now,
@@ -88,7 +80,6 @@ export class TaskStorageAdapter implements ITaskRepository {
   }
 
   async update(id: string, input: UpdateTaskInput): Promise<ITask> {
-    await this.simulateDelay();
     const tasks = await this.loadFromStorage();
 
     const index = tasks.findIndex((t) => t.id === id);
@@ -110,9 +101,13 @@ export class TaskStorageAdapter implements ITaskRepository {
 
     if (input.photoUri === null) {
       delete updated.photoUri;
+      delete updated.photoName;
       delete updated.photoSizeKb;
     } else if (input.photoUri !== undefined) {
       updated.photoUri = input.photoUri;
+      if (input.photoName !== undefined && input.photoName !== null) {
+        updated.photoName = input.photoName;
+      }
       if (input.photoSizeKb !== undefined && input.photoSizeKb !== null) {
         updated.photoSizeKb = input.photoSizeKb;
       }
@@ -124,8 +119,9 @@ export class TaskStorageAdapter implements ITaskRepository {
       updated.location = input.location;
     }
 
-    tasks[index] = updated;
-    await this.saveToStorage([...tasks]);
+    const nextTasks = [...tasks];
+    nextTasks[index] = updated;
+    await this.saveToStorage(nextTasks);
 
     if (previousPhotoUri && previousPhotoUri !== updated.photoUri) {
       await deletePersistedPhoto(previousPhotoUri);
@@ -135,7 +131,6 @@ export class TaskStorageAdapter implements ITaskRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    await this.simulateDelay();
     const tasks = await this.loadFromStorage();
 
     const target = tasks.find((t) => t.id === id);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   FlatList,
@@ -60,6 +60,7 @@ export default function App() {
     allTasksCount,
     isLoading,
     isActionLoading,
+    error: tasksError,
     filter,
     setFilter,
     searchQuery,
@@ -82,6 +83,12 @@ export default function App() {
   const showToast = (message: string) => {
     setToastMessage(message);
   };
+
+  useEffect(() => {
+    if (tasksError) {
+      setToastMessage(`⚠ ${tasksError}`);
+    }
+  }, [tasksError]);
 
   const handleOpenCreate = () => {
     setEditingTask(null);
@@ -245,6 +252,7 @@ export default function App() {
                     visible={isProfileModalVisible}
                     onDismiss={() => setIsProfileModalVisible(false)}
                     profile={activeProfile}
+                    biometricLabel={biometricCapability.label}
                     onDeleteProfile={async () => {
                       await deleteProfile(activeProfile.id);
                     }}

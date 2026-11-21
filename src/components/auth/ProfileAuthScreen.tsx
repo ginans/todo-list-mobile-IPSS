@@ -14,8 +14,6 @@ import { styles } from './styles/profile-auth.styles';
 interface ProfileAuthScreenProps {
   profiles: IUserProfile[];
   defaultProfileId?: string | null;
-  canGoBack?: boolean;
-  onGoBack?: () => void;
   biometricCapability: IBiometricCapability;
   authError: string | null;
   onCreateProfile: (input: CreateProfileInput) => Promise<boolean>;
@@ -27,8 +25,6 @@ interface ProfileAuthScreenProps {
 export const ProfileAuthScreen: React.FC<ProfileAuthScreenProps> = ({
   profiles,
   defaultProfileId,
-  canGoBack = false,
-  onGoBack,
   biometricCapability,
   authError,
   onCreateProfile,
@@ -67,6 +63,8 @@ export const ProfileAuthScreen: React.FC<ProfileAuthScreenProps> = ({
 
   const biometricOwner = profiles.find((item) => item.biometricEnabled) ?? null;
   const canAssignBiometric = biometricCapability.available && !biometricOwner;
+  const biometricIcon =
+    biometricCapability.biometryType === 'facial' ? 'face-recognition' : 'fingerprint';
 
   useEffect(() => {
     setEnableBiometric(canAssignBiometric);
@@ -125,22 +123,6 @@ export const ProfileAuthScreen: React.FC<ProfileAuthScreenProps> = ({
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.card}>
-        {canGoBack && onGoBack && (
-          <Pressable
-            onPress={onGoBack}
-            style={styles.backRow}
-            accessibilityRole="button"
-            accessibilityLabel="Volver a mi cuaderno"
-          >
-            <MaterialCommunityIcons
-              name="arrow-left"
-              size={18}
-              color={paperPalette.accentPrimary}
-            />
-            <Text style={styles.backText}>Volver a mi cuaderno</Text>
-          </Pressable>
-        )}
-
         <View style={styles.brandHeader}>
           <View style={styles.brandIconBox}>
             <MaterialCommunityIcons
@@ -205,7 +187,7 @@ export const ProfileAuthScreen: React.FC<ProfileAuthScreenProps> = ({
                     Desbloqueo con {biometricCapability.label}
                   </Text>
                   <Text style={styles.biometricSwitchSubtitle}>
-                    Vincula tu huella digital a este perfil principal.
+                    Vincula tu {biometricCapability.label.toLowerCase()} a este perfil principal.
                   </Text>
                 </View>
                 <Switch
@@ -218,9 +200,7 @@ export const ProfileAuthScreen: React.FC<ProfileAuthScreenProps> = ({
             ) : biometricCapability.available && biometricOwner ? (
               <View style={styles.biometricSwitchRow}>
                 <View style={styles.biometricSwitchText}>
-                  <Text style={styles.biometricSwitchTitle}>
-                    Huella digital exclusiva
-                  </Text>
+                  <Text style={styles.biometricSwitchTitle}>Biometría exclusiva</Text>
                   <Text style={styles.biometricSwitchSubtitle}>
                     {APP_MESSAGES.AUTH.BIOMETRIC_OWNER_TAKEN(biometricOwner.name)}
                   </Text>
@@ -373,7 +353,7 @@ export const ProfileAuthScreen: React.FC<ProfileAuthScreenProps> = ({
                       label={`Usar ${biometricCapability.label}`}
                       onPress={handleBiometricPress}
                       variant="outline"
-                      icon="fingerprint"
+                      icon={biometricIcon}
                       disabled={isSubmitting}
                     />
                   )}

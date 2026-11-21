@@ -8,6 +8,7 @@ export type UpdateTaskInput = {
   status?: TaskStatus;
   priority?: TaskPriority;
   photoUri?: string | null;
+  photoName?: string | null;
   photoSizeKb?: number | null;
   location?: ITaskLocation | null;
 };

@@ -10,6 +10,7 @@ export interface ITask {
   status: TaskStatus;
   priority: TaskPriority;
   photoUri?: string;
+  photoName?: string;
   photoSizeKb?: number;
   location?: ITaskLocation;
   createdAt: string;

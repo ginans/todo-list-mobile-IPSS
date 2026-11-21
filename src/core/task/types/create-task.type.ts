@@ -9,6 +9,7 @@ export type CreateTaskInput = {
   priority?: TaskPriority;
   status?: TaskStatus;
   photoUri?: string;
+  photoName?: string;
   photoSizeKb?: number;
   location?: ITaskLocation;
 };
