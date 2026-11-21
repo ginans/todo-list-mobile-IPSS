@@ -42,6 +42,7 @@ Desarrollada para el **Instituto Profesional San Sebastián** como entrega de la
 - [Evidencia Visual](#evidencia-visual)
   - [Flujo Principal en Aplicación](#flujo-principal-en-aplicación)
   - [Evidencia en Dispositivo Físico](#evidencia-en-dispositivo-físico)
+- [Nota sobre el proceso de desarrollo](#nota-sobre-el-proceso-de-desarrollo)
 
 ---
 
@@ -334,3 +335,11 @@ Capturas tomadas directamente en dispositivo físico Android ejecutando **Expo G
 | 3. Captura Real con Cámara y Registro GPS | 4. Tarea Guardada con Foto y Dirección GPS |
 | :---: | :---: |
 | ![Formulario con cámara y GPS en Android](./screenshots/u2/11-nativo-formulario-foto-gps.jpg) | ![Dashboard con foto y GPS en Android](./screenshots/u2/12-nativo-dashboard-foto-gps.jpg) |
+
+---
+
+## Nota sobre el proceso de desarrollo
+
+Este proyecto fue desarrollado con el apoyo de herramientas de inteligencia artificial como el agente de programación `Antigravity` de Google DeepMind para agilizar tareas de refactorización en React Native, tipado estricto en TypeScript, generación de casos de prueba con Jest y Playwright y estructuración documental.
+
+Su uso se enmarca en una metodología de **pair programming colaborativo**, donde la **definición de la arquitectura desacoplada por capas, las decisiones de seguridad y privacidad multi-perfil, los criterios de experiencia de usuario para cámara, GPS y biometría, las pruebas en dispositivo físico Android y la validación de cada cambio fueron dirigidas y supervisadas en todo momento por la desarrolladora Gina Norambuena Sánchez**, quien actuó como **arquitecta principal de la aplicación** antes de cada integración al repositorio.
